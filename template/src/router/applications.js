@@ -21,12 +21,8 @@ const Messenger = Loader(
 const Calendar = Loader(
   lazy(() => import('src/content/applications/Calendar'))
 );
-const JobsPlatform = Loader(
-  lazy(() => import('src/content/applications/JobsPlatform'))
-);
-const ProjectsBoard = Loader(
-  lazy(() => import('src/content/applications/ProjectsBoard'))
-);
+
+
 const Mailbox = Loader(lazy(() => import('src/content/applications/Mailbox')));
 
 const applicationsRoutes = [
@@ -42,14 +38,8 @@ const applicationsRoutes = [
     path: 'file-manager',
     element: <FileManager />
   },
-  {
-    path: 'jobs-platform',
-    element: <JobsPlatform />
-  },
-  {
-    path: 'projects-board',
-    element: <ProjectsBoard />
-  },
+
+
   {
     path: 'messenger',
     element: <Messenger />

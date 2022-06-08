@@ -1,6 +1,7 @@
 import { useState, forwardRef } from 'react';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
+import axios from 'axios' ;
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
@@ -139,7 +140,8 @@ function RecoverPasswordBasic() {
                 { setErrors, setStatus, setSubmitting }
               ) => {
                 try {
-                  if (isMountedRef.current) {
+                  const res = await axios.post('http://localhost:5000/auth/forgotpassword',{email:values.email})
+                  if (isMountedRef.current && res.data.success)  {
                     setStatus({ success: true });
                     setSubmitting(false);
                   }

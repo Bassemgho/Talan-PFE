@@ -12,7 +12,8 @@ const roomSchema = mongoose.Schema({
 
   },
   files:{
-    type:['String'],
+    type:[mongoose.Schema.Types.ObjectId],
+    ref:'files'
   }
 
 })

@@ -177,7 +177,7 @@ const getOptions = ()=>{
 
   const handleDelete = async () => {
     try {
-      dispatch(deleteEvent(event.id));
+      dispatch(deleteEvent(event._id));
       onDeleteComplete();
 
       enqueueSnackbar(t('The event has been deleted'), {

@@ -17,10 +17,10 @@ import {
   CircularProgress,
   styled
 } from '@mui/material';
+import axios from 'axios'
 import AddCircleTwoToneIcon from '@mui/icons-material/AddCircleTwoTone';
 import useAuth from 'src/hooks/useAuth';
 import useRefMounted from 'src/hooks/useRefMounted';
-
 import { formatDistance, subHours, subMinutes } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import Scrollbar from 'src/components/Scrollbar';
@@ -219,7 +219,7 @@ function Block5({display,eventid,peersRef}) {
     setSelectedFile(e.target.files[0] )
 
   }
-  const sendMessage = (e) => {
+  const sendMessage = async (e) => {
     if (e.key === 'Enter') {
       // console.log('clicking');
       const msg = e.target.value;
@@ -229,9 +229,27 @@ function Block5({display,eventid,peersRef}) {
 
         socket.emit('BE-send-message', { eventid, msg, sender: user._id });
         inputRef.current.value = '';
+
       }
+
+      if(selectedFile ){
+        console.log('sending file')
+        const formData = new FormData();
+        formData.append('attachement',selectedFile);
+        const config = {
+          headers: {
+            'content-type': 'multipart/form-data'
+          }
+        };
+        const res = await axios.post(`http://localhost:5000/uploadfile/${eventid}`,formData)
+          if(res.success){
+            alert('file uploaded')
+          }else{
+            alert('file not uploaded')
+          }
+        }
+      };
     }
-  };
 const renderMessages = (message,key)=>{
   // console.log(messages);
   // messages.map((ms,index)=>{
@@ -595,7 +613,7 @@ console.log(msgs);
             placeholder={t('Write here your message...')}
           />
         </Box>
-        <input id="messenger-upload-file" type="file" onChange={handleFileChange} hidden />
+        <input id="messenger-upload-file" type="file" onChange={handleFileChange} name='attachement' hidden />
         <Tooltip arrow placement="top" title={t('Attach a file')}>
           <label htmlFor="messenger-upload-file">
             <IconButton color="primary" component="span">

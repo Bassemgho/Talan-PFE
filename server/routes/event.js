@@ -1,11 +1,25 @@
 import { addEvent } from "../controllers/event.js";
+import { uploadfile } from "../controllers/files.js"
 import protectAdmin from '../middlewares/protectAdmin.js'
 import protect from '../middlewares/protect.js'
 import express from 'express'
+import multer from 'multer'
 import {getallpolls} from '../controllers/polls.js'
 import { fetshallevents ,fetshuserevents,deleteEvent} from "../controllers/event.js";
 
-const router = express.Router()
+const storage = multer.diskStorage(
+    {
+        destination: './uploads/',
+        filename: function ( req, file, cb ) {
+            //req.body is empty...
+            //How could I get the new_file_name property sent from client here?
+            cb( null, file.originalname+ '-' + Date.now()+".pdf");
+        }
+    }
+);
+const upload = multer({ storage: storage } )
+const router = express.Router();
+router.route('/uploadfile/:eventid').post([protect,upload.single('attachement')],uploadfile)
 router.route('/getAllpolls').get(protect,getallpolls)
 router.route('/events/delete').post(protectAdmin,deleteEvent);
 router.route('/events/addevent').post(protect,addEvent);

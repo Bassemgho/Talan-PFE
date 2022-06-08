@@ -7,14 +7,19 @@ import jwt from 'jsonwebtoken'
 
 const map = { userRole: "6240d8b36d0ad04caca79f00" }
 
-const email = process.env.MAILER_EMAIL_ID || 'talandev2022@gmail.com'
-const pass = process.env.MAILER_PASSWORD || 'PFEdev2022'
+const mail = process.env.MAILER_EMAIL_ID || 'talandev2022@gmail.com'
+const pass = process.env.MAILER_PASSWORD || 'PFEdev2023'
 let transport = nodemailer.createTransport({
     service: process.env.MAILER_SERVICE_PROVIDER || 'Gmail',
-    auth: {
-        user: email,
-        pass: pass,
-    },
+    auth:{
+      type: 'OAuth2',
+      user:mail,
+      pass:pass,
+      clientId:'834985114594-hd92eo90c1c65tm2liuii3cciatbqne9.apps.googleusercontent.com',
+      clientSecret:'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',
+      refreshToken: '1//04HyRHbfgkUHCCgYIARAAGAQSNwF-L9IrUd3jNIhd1qIODQT0DoCpxD7694-W3fYiaHp_ilAtiIskXQuUuCtjJpUsiZXUe4EX8n0'
+      // accessToken:'AIzaSyB4FFd9bZl1lT_l6Cff-7GfmCCrRx2IP4A'
+  }
 });
 let handlebarsOptions = {
     viewEngine: {
@@ -59,6 +64,7 @@ export const verifyresettoken = async (req, res, next) => {
 }
 export const forgot_password = async (req, res, next) => {
     const { email } = req.body;
+    console.log('view path',handlebarsOptions.viewPath)
     try {
         const user = await users.findOne({ email })
         if (!user) {

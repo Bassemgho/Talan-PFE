@@ -1,6 +1,10 @@
 import mongoose from 'mongoose'
 
 const fileSchema = mongoose.Schema({
+  uploader:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'users'
+  },
   ext:{
     type:'String',
     required:[true,'cant find extension']
@@ -8,6 +12,9 @@ const fileSchema = mongoose.Schema({
   path:{
     type:'String',
     required:[true,"cant find the path to the file"]
+  },
+  size:{
+    type:'Number'
   }
 },{timestamps:true})
 const files = mongoose.model('files',fileSchema);
