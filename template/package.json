@@ -1,12 +1,7 @@
 {
-  "name": "tokyo-white-react-admin-dashboard-js",
+  "name": "pfe-talan-2022-js",
   "version": "3.0.0",
-  "title": "Tokyo White React Javascript Admin Dashboard",
-  "description": "High performance React template built with lots of powerful MUI (Material-UI) components across multiple product niches for fast & perfect apps development processes.",
-  "author": {
-    "name": "BloomUI.com",
-    "url": "https://bloomui.com"
-  },
+  "title": "PFE-Talan",
   "private": true,
   "dependencies": {
     "@auth0/auth0-spa-js": "1.19.2",
