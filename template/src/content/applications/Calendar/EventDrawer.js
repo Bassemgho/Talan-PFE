@@ -241,7 +241,7 @@ const getOptions = ()=>{
           };
 
           if (event) {
-            dispatch(updateEvent(event.id, data));
+            dispatch(updateEvent(event._id, data));
           } else {
             dispatch(createEvent(data));
           }

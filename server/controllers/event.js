@@ -64,6 +64,9 @@ export const fetshallevents = async (req,res,next) => {
     fetshuserevents(req,res,next)
   }
  }
+export const updateEvent = async (req,res,next) => {
+  const {} = req.body
+}
 export const addEvent = async (req, res, next) => {
   console.log('body',req.body)
     let {titre,participants,mods,dateDebut,dateFin,desc} = req.body

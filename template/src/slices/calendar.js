@@ -96,7 +96,7 @@ export const selectEvent = (eventId) => async (dispatch) => {
 };
 
 export const updateEvent = (eventId, update) => async (dispatch) => {
-  const response = await axios.post('/api/calendar/meetings/update', {
+  const response = await axios.post('http://localhost:5000/events/update', {
     eventId,
     update
   });
