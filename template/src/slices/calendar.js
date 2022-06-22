@@ -22,8 +22,16 @@ const slice = createSlice({
     },
     createEvent(state, action) {
       const { event } = action.payload;
+      console.log('event',event);
+      let reformatedData = {};
+      reformatedData._id=event._id;
+      reformatedData.title = event.titre;
+      reformatedData.start = event.dateDebut;
+      reformatedData.end = event.dateFin
+      reformatedData.description = event.desc
 
-      state.events = [...state.events, event];
+      // state.events = [...state.events, reformatedData];
+      state.events = state.events.concat([reformatedData]);
     },
     selectEvent(state, action) {
       const { eventId = null } = action.payload;
@@ -33,9 +41,9 @@ const slice = createSlice({
     },
     updateEvent(state, action) {
       const { event } = action.payload;
-
+      console.log('eventUUU',event)
       state.events = _.map(state.events, (_event) => {
-        if (_event.id === event.id) {
+        if (_event._id === event._id) {
           return event;
         }
 
@@ -44,8 +52,8 @@ const slice = createSlice({
     },
     deleteEvent(state, action) {
       const { eventId } = action.payload;
-
-      state.events = _.reject(state.events, { id: eventId });
+      console.log('event',eventId);
+      state.events = _.reject(state.events, { _id: eventId });
     },
     selectRange(state, action) {
       const { start, end } = action.payload;
@@ -73,6 +81,7 @@ export const getEvents = () => async (dispatch) => {
   // const response = await axios.get('/api/calendar/meetings');
 
   const response = await axios.get('http://localhost:5000/events/all');
+  console.log('response',response.data);
   dispatch(slice.actions.getEvents(response.data));
 };
 
@@ -100,8 +109,10 @@ export const updateEvent = (eventId, update) => async (dispatch) => {
     eventId,
     update
   });
+  if (response.success === true) {
 
-  dispatch(slice.actions.updateEvent(response.data));
+    dispatch(slice.actions.updateEvent(response.data));
+  }
 };
 
 export const deleteEvent = (eventId) => async (dispatch) => {

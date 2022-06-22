@@ -77,5 +77,4 @@ const router = [
     ]
   }
 ];
-//to do route to change password page
 export default router;

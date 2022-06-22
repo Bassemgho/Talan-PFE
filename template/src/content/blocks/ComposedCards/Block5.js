@@ -1,11 +1,15 @@
 /* eslint-disable */
-import {useState,useRef,useEffect,useContext} from 'react'
+import {useState,useRef,useEffect,useContext,useCallback} from 'react'
 import {SocketContext} from 'src/contexts/SocketContext.js'
+import MoreHorizTwoToneIcon from '@mui/icons-material/MoreHorizTwoTone';
+import TextSnippetTwoToneIcon from '@mui/icons-material/TextSnippetTwoTone';
+
 import {
   Box,
   Card,
   Typography,
   alpha,
+  Grid,
   IconButton,
   Tooltip,
   TextField,
@@ -15,13 +19,18 @@ import {
   Button,
   Slide,
   CircularProgress,
+  CardActionArea,
+  CardActions,
+  Tabs,
+  Tab,
+  useTheme,
   styled
 } from '@mui/material';
 import axios from 'axios'
 import AddCircleTwoToneIcon from '@mui/icons-material/AddCircleTwoTone';
 import useAuth from 'src/hooks/useAuth';
 import useRefMounted from 'src/hooks/useRefMounted';
-import { formatDistance, subHours, subMinutes } from 'date-fns';
+import { formatDistance, subHours, subMinutes,subDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import Scrollbar from 'src/components/Scrollbar';
 import AttachFileTwoToneIcon from '@mui/icons-material/AttachFileTwoTone';
@@ -58,7 +67,8 @@ const CardWrapperSecondary = styled(Card)(
         border-radius: ${theme.general.borderRadiusXl};
         border-top-left-radius: ${theme.general.borderRadius};
         max-width: 380px;
-        display: inline-flex;
+        display:flex;
+        flex-direction: column;
   `
 );
 
@@ -67,9 +77,133 @@ const CardWrapper = styled(Card)(
       background: ${alpha(theme.colors.alpha.black[10], 0.05)};
       box-shadow: none;
       border-radius: 0;
+
   `
 );
-function Message({text,time}) {
+const TabsWrapper = styled(Tabs)(
+  () => `
+    .MuiTabs-scrollableX {
+      overflow-x: auto !important;
+
+      .MuiTabs-indicator {
+        box-shadow: none;
+      }
+    }
+`
+);
+
+const CardActionAreaWrapper = styled(CardActionArea)(
+  ({ theme }) => `
+      height: ${theme.spacing(18)};
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      overflow: hidden;
+
+      .MuiSvgIcon-root {
+        opacity: .5;
+      }
+
+      .MuiTouchRipple-root {
+        opacity: .3;
+      }
+
+      img {
+        height: auto;
+        width: 100%;
+      }
+
+      .MuiCardActionArea-focusHighlight {
+        background: ${theme.colors.warning.main};
+      }
+
+      &:hover {
+        .MuiCardActionArea-focusHighlight {
+          opacity: .05;
+        }
+      }
+`
+);
+
+function FileCard({attachement}){
+  const theme = useTheme();
+  const { t } = useTranslation();
+  const [filename,setFilename] = useState('')
+  const [created,setCreated] = useState(new Date())
+  const [uploader,setUploader] = useState('')
+
+  const getFileInfo = useCallback(async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/events/fileinfo/${attachement}`)
+      if (response.data.success==true) {
+        setFilename(response.data.name)
+        setCreated(response.data.updatedAt)
+        setUploader(response.data.uploader)
+      }
+    }catch (err){
+      alert(err)
+    }
+  })
+  useEffect(()=>{
+    getFileInfo()
+  },[getFileInfo])
+
+
+  return (
+    <Grid item xs={12} sm={6}>
+      <Card>
+        <CardActionAreaWrapper onClick={()=>{}}>
+          <Typography
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: `${theme.typography.pxToRem(55)}`
+            }}
+            color="text.secondary"
+          >
+            <TextSnippetTwoToneIcon fontSize="inherit" />
+          </Typography>
+        </CardActionAreaWrapper>
+        <Divider />
+        <CardActions
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 2
+          }}
+        >
+          <Box>
+            <Box display="flex" alignItems="center" pb={0.5}>
+              <TextSnippetTwoToneIcon />
+              <Typography
+                sx={{
+                  pl: 1
+                }}
+                fontWeight="bold"
+                variant="h6"
+              >
+                {filename}
+              </Typography>
+            </Box>
+            <Typography component="span" variant="subtitle1">
+              {t('Edited')}{' '}
+              {formatDistance((new Date(created)||subDays(new Date(), 3)), new Date(), {
+                addSuffix: true
+              })}{' '}
+              {t('by')}{uploader}
+            </Typography>
+          </Box>
+          <IconButton size="small" color="primary">
+            <MoreHorizTwoToneIcon />
+          </IconButton>
+        </CardActions>
+      </Card>
+    </Grid>
+
+  )
+}
+function Message({text,time,message}) {
   const { user } = useAuth();
 
   return (
@@ -96,7 +230,8 @@ function Message({text,time}) {
         ml={2}
       >
         <CardWrapperSecondary>
-          {text}
+        {text}
+        {message.attachement && <FileCard attachement={message.attachement} /> }
         </CardWrapperSecondary>
         <Typography
           variant="subtitle1"
@@ -120,7 +255,7 @@ function Message({text,time}) {
     </Box>
   );
 }
-function MyMessage({text,time}) {
+function MyMessage({text,time,message}) {
   const { user } = useAuth();
 
   return (
@@ -138,6 +273,7 @@ function MyMessage({text,time}) {
         mr={2}
       >
         <CardWrapperPrimary>
+        {message.attachement && <FileCard attachement={message.attachement} />}
           {text}
         </CardWrapperPrimary>
         <Typography
@@ -178,6 +314,7 @@ function Block5({display,eventid,peersRef}) {
   const {getSocket} = useContext(SocketContext);
   const socket = getSocket();
   const w = display ? '':'0px'
+  const [currentTab, setCurrentTab] = useState('messenger');
   const [msgs, setMsg] = useState([]);
   const [finished,setfinished] = useState(false)
   const messagesEndRef = useRef();
@@ -185,6 +322,10 @@ function Block5({display,eventid,peersRef}) {
   const inputRef = useRef();
   const isMountedRef = useRefMounted();
   isMountedRef.current=true
+  const tabs = [
+    { value: 'all users', label: t('all users') },
+    { value: 'messanger', label: t('messanger') },
+  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current.scrollIntoView({ behavior: 'smooth'});
@@ -195,6 +336,7 @@ function Block5({display,eventid,peersRef}) {
       if (isMountedRef) {
         setMsg(messages)
         setfinished(true)
+        // setSelectedFile(null)
 
       }
 
@@ -207,7 +349,7 @@ function Block5({display,eventid,peersRef}) {
       if (isMountedRef) {
         console.log('receive',{ msg });
 
-        setMsg(msgs.concat([{ msg:msg.text, sender:msg.sender,updatedAt:msg.updatedAt }]));
+        setMsg(msgs.concat([{ msg:msg.text, sender:msg.sender,updatedAt:msg.updatedAt,attachement:msg.attachement}]));
       }
       // console.log('now',msgs);
     });
@@ -223,15 +365,7 @@ function Block5({display,eventid,peersRef}) {
     if (e.key === 'Enter') {
       // console.log('clicking');
       const msg = e.target.value;
-
-      if (msg) {
-        // console.log('clicking2');
-
-        socket.emit('BE-send-message', { eventid, msg, sender: user._id });
-        inputRef.current.value = '';
-
-      }
-
+      let file;
       if(selectedFile ){
         console.log('sending file')
         const formData = new FormData();
@@ -242,12 +376,29 @@ function Block5({display,eventid,peersRef}) {
           }
         };
         const res = await axios.post(`http://localhost:5000/uploadfile/${eventid}`,formData)
-          if(res.success){
+          file = res.data.file
+          if(res.data.success){
             alert('file uploaded')
           }else{
             alert('file not uploaded')
           }
         }
+      if (msg) {
+        // console.log('clicking2');
+        if(file){
+
+          socket.emit('BE-send-message', { eventid, msg, sender: user._id,file:file._id});
+        }else{
+          socket.emit('BE-send-message', { eventid, msg, sender: user._id});
+
+        }
+        // setSelectedFile(null)
+
+        inputRef.current.value = '';
+
+      }
+
+      setSelectedFile(null)
       };
     }
 const renderMessages = (message,key)=>{
@@ -265,380 +416,142 @@ const renderMessages = (message,key)=>{
     }
   // })
 }
+const handleTabsChange = (_event, value) => {
+  setCurrentTab(value);
+};
+
 console.log(msgs);
   return (
-    <Slide direction= 'left' in={display } mountOnEnter unmountOnExit  >
+  <Slide direction= 'left' in={display } mountOnEnter unmountOnExit  >
 
-    <Card style = {{"width":w,'transition': 'width 0.3s, height 0.3s'}} >
-    <Button onClick={() => {console.log(msgs);}}> log messages </Button>
-      <Box
-        p={2}
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-      >
-        <Box>
-          <Typography
-            sx={{
-              pb: 1
-            }}
-            variant="caption"
-            fontWeight="bold"
-          >
-            {t('Messenger')}
-          </Typography>
-          {/* <Typography variant="h4">{t('Talking to Kate')}</Typography> */}
-        </Box>
-        <IconButton color="primary">
-          <AddCircleTwoToneIcon />
-        </IconButton>
-      </Box>
-      <Divider />
-      <Box
-        sx={{
-          height: 487
-        }}
-      >
-        <Scrollbar>
-
-          <Box px={2}>
-          {!finished?<CircularProgress size={24} disableShrink thickness={2} />:null}
-          {msgs&& msgs.map((mg,index)=>{
-            if (mg.sender===user._id) {
-              return (
-                <MyMessage time={mg.updatedAt} ref={index==msgs.length-1?messagesEndRef:ref} key={index} text={mg.msg||mg.text}  / >
-              );
-            }else {
-              return (
-
-
-                <Message time={mg.updatedAt} ref={index==msgs.length-1?messagesEndRef:ref} key={index} text={mg.msg||mg.text}  /> )
-            }
-          })}
-{/*            <Box
-              display="flex"
-              alignItems="flex-start"
-              justifyContent="flex-start"
-              py={3}
-            >
-              <Avatar
-                variant="rounded"
-                sx={{
-                  width: 50,
-                  height: 50
-                }}
-                alt="Zain Baptista"
-                src="/static/images/avatars/1.jpg"
-              />
-              <Box
-                display="flex"
-                alignItems="flex-start"
-                flexDirection="column"
-                justifyContent="flex-start"
-                ml={2}
-              >
-                <CardWrapperSecondary>
-                  Hi. Can you send me the missing invoices asap?
-                </CardWrapperSecondary>
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    pt: 1,
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                >
-                  <ScheduleTwoToneIcon
-                    sx={{
-                      mr: 0.5
-                    }}
-                    fontSize="small"
-                  />
-                  {formatDistance(subHours(new Date(), 115), new Date(), {
-                    addSuffix: true
-                  })}
-                </Typography>
-              </Box>
-            </Box>
-
+          <Card  >
+          <Button onClick={() => {console.log(selectedFile);}}> log messages </Button>
             <Box
+              p={2}
               display="flex"
-              alignItems="flex-start"
-              justifyContent="flex-end"
-              py={3}
+              alignItems="center"
+              justifyContent="space-between"
             >
-              <Box
-                display="flex"
-                alignItems="flex-end"
-                flexDirection="column"
-                justifyContent="flex-end"
-                mr={2}
-              >
-                <CardWrapperPrimary>
-                  Yes, I'll email them right now. I'll let you know once the
-                  remaining invoices are done.
-                </CardWrapperPrimary>
+              <Box>
                 <Typography
-                  variant="subtitle1"
                   sx={{
-                    pt: 1,
-                    display: 'flex',
-                    alignItems: 'center'
+                    pb: 1
                   }}
+                  variant="caption"message
+                  fontWeight="bold"
                 >
-                  <ScheduleTwoToneIcon
-                    sx={{
-                      mr: 0.5
-                    }}
-                    fontSize="small"
-                  />
-                  {formatDistance(subHours(new Date(), 125), new Date(), {
-                    addSuffix: true
-                  })}
+                  {t('Messenger')}
                 </Typography>
+                {/* <Typography variant="h4">{t('Talking to Kate')}</Typography> */}
               </Box>
-              <Avatar
-                variant="rounded"
-                sx={{
-                  width: 50,
-                  height: 50
-                }}
-                alt={user.name}
-                src={user.avatar}
-              />
+              <IconButton color="primary">
+                <AddCircleTwoToneIcon />
+              </IconButton>
             </Box>
+            <Divider />
+            <Box
+              sx={{
+                height: 487
+              }}
+            >
+              <Scrollbar>
 
-            <Box
-              display="flex"
-              alignItems="flex-start"
-              justifyContent="flex-end"
-              py={3}
-            >
-              <Box
-                display="flex"
-                alignItems="flex-end"
-                flexDirection="column"
-                justifyContent="flex-end"
-                mr={2}
-              >
-                <CardWrapperPrimary>Hey! Are you there?</CardWrapperPrimary>
-                <CardWrapperPrimary
-                  sx={{
-                    mt: 2
-                  }}
-                >
-                  Heeeelloooo????
-                </CardWrapperPrimary>
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    pt: 1,
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                >
-                  <ScheduleTwoToneIcon
-                    sx={{
-                      mr: 0.5
-                    }}
-                    fontSize="small"
-                  />
-                  {formatDistance(subHours(new Date(), 60), new Date(), {
-                    addSuffix: true
-                  })}
-                </Typography>
-              </Box>
-              <Avatar
-                variant="rounded"
-                sx={{
-                  width: 50,
-                  height: 50
-                }}
-                alt={user.name}
-                src={user.avatar}
-              />
-            </Box>
-            <Box
-              display="flex"
-              alignItems="flex-start"
-              justifyContent="flex-start"
-              py={3}
-            >
-              <Avatar
-                variant="rounded"
-                sx={{
-                  width: 50,
-                  height: 50
-                }}
-                alt="Zain Baptista"
-                src="/static/images/avatars/1.jpg"
-              />
-              <Box
-                display="flex"
-                alignItems="flex-start"
-                flexDirection="column"
-                justifyContent="flex-start"
-                ml={2}
-              >
-                <CardWrapperSecondary>Hey there!</CardWrapperSecondary>
-                <CardWrapperSecondary
-                  sx={{
-                    mt: 1
-                  }}
-                >
-                  How are you? Is it ok if I call you?
-                </CardWrapperSecondary>
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    pt: 1,
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                >
-                  <ScheduleTwoToneIcon
-                    sx={{
-                      mr: 0.5
-                    }}
-                    fontSize="small"
-                  />
-                  {formatDistance(subMinutes(new Date(), 6), new Date(), {
-                    addSuffix: true
-                  })}
-                </Typography>
-              </Box>
-            </Box>
-            <Box
-              display="flex"
-              alignItems="flex-start"
-              justifyContent="flex-end"
-              py={3}
-            >
-              <Box
-                display="flex"
-                alignItems="flex-end"
-                flexDirection="column"
-                justifyContent="flex-end"
-                mr={2}
-              >
-                <CardWrapperPrimary>
-                  Hello, I just got my Amazon order shipped and I’m very happy
-                  about that.
-                </CardWrapperPrimary>
-                <CardWrapperPrimary
-                  sx={{
-                    mt: 1
-                  }}
-                >
-                  Can you confirm?
-                </CardWrapperPrimary>
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    pt: 1,
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                >
-                  <ScheduleTwoToneIcon
-                    sx={{
-                      mr: 0.5
-                    }}
-                    fontSize="small"
-                  />
-                  {formatDistance(subMinutes(new Date(), 8), new Date(), {
-                    addSuffix: true
-                  })}
-                </Typography>
-              </Box>
-              <Avatar
-                variant="rounded"
-                sx={{
-                  width: 50,
-                  height: 50
-                }}
-                alt={user.name}
-                src={user.avatar}
-              />
-            </Box>*/}
-          </Box>
-        </Scrollbar>
-      </Box>
-      <Divider />
-      <CardWrapper
-        sx={{
-          p: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}
-      >
-        <Box>
-          <Button
-            variant="outlined"
-            color="secondary"
-            sx={{
-              mr: 1
-            }}
-            size="small"
-          >
-            {t('Create Post')}
-          </Button>
-          <Button variant="outlined" color="secondary" size="small">
-            {t('Event')}
-          </Button>
-        </Box>
-        <Typography variant="subtitle2">
-          {t('Posting as')}{' '}
-          <Typography component="span" color="text.primary">
-            <b>Emma Taylor</b>
-          </Typography>
-        </Typography>
-      </CardWrapper>
-      <Divider />
-      <Box p={2} display="flex" alignItems="center">
-        <Avatar alt={user.firstname} src={user.avatar} />
-        <DividerWrapper orientation="vertical" flexItem />
-        <Box
-          sx={{
-            flex: 1,
-            mr: 2
-          }}
-        >
-          <TextField
-            ref={inputRef}
-            onKeyUp={sendMessage}
-            hiddenLabel
-            fullWidth
-            placeholder={t('Write here your message...')}
-          />
-        </Box>
-        <input id="messenger-upload-file" type="file" onChange={handleFileChange} name='attachement' hidden />
-        <Tooltip arrow placement="top" title={t('Attach a file')}>
-          <label htmlFor="messenger-upload-file">
-            <IconButton color="primary" component="span">
-              <AttachFileTwoToneIcon />
+                <Box px={2}>
+                {!finished?<CircularProgress size={24} disableShrink thickness={2} />:null}
+                {msgs&& msgs.map((mg,index)=>{
+                  if (mg.sender===user._id) {
+                    return (
+                      <MyMessage time={mg.updatedAt} ref={index==msgs.length-1?messagesEndRef:ref} key={index} text={mg.msg||mg.text} message={mg} / >
+                    );
+                  }else {
+                    return (
 
-            </IconButton>
-          </label>
-        </Tooltip>
-        <DividerWrapper orientation="vertical" flexItem />
-        <Badge
-          color="warning"
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left'
-          }}
-          variant="dot"
-        >
-          <Button variant="contained" startIcon={<SendTwoToneIcon />}>
-            {t('Send')}
-          </Button>
-        </Badge>
-      </Box>
-    </Card>
-    </Slide>
-  );
+
+                      <Message time={mg.updatedAt} ref={index==msgs.length-1?messagesEndRef:ref} key={index} text={mg.msg||mg.text} message={mg} /> )
+                  }
+                })}
+                </Box>
+              </Scrollbar>
+            </Box>
+            <Divider />
+            <CardWrapper
+              sx={{
+                p: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
+              <Box>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  sx={{
+                    mr: 1
+                  }}
+                  size="small"
+                >
+                  {t('Create Post')}
+                </Button>
+                <Button variant="outlined" color="secondary" size="small">
+                  {t('Event')}
+                </Button>
+              </Box>
+              <Typography variant="subtitle2">
+                {t('Posting as')}{' '}
+                <Typography component="span" color="text.primary">
+                  <b>Emma Taylor</b>
+                </Typography>
+              </Typography>
+            </CardWrapper>
+            <Divider />
+            <Box p={2} display="flex" alignItems="center">
+              <Avatar alt={user.firstname} src={user.avatar} />
+              <DividerWrapper orientation="vertical" flexItem />
+              <Box
+                sx={{
+                  flex: 1,
+                  mr: 2
+                }}
+              >
+                <TextField
+                  ref={inputRef}
+                  onKeyUp={sendMessage}
+                  hiddenLabel
+                  fullWidth
+                  placeholder={t('Write here your message...')}
+                />
+                {selectedFile &&
+                  <Typography component="span" color="text.primary">
+                  <b>{selectedFile.name}</b>}
+                </Typography>}
+              </Box>
+              <input id="messenger-upload-file" type="file" onChange={handleFileChange} name='attachement' hidden />
+              <Tooltip arrow placement="top" title={t('Attach a file')}>
+                <label htmlFor="messenger-upload-file">
+                  <IconButton color="primary" component="span">
+                    <AttachFileTwoToneIcon />
+
+                  </IconButton>
+                </label>
+              </Tooltip>
+              <DividerWrapper orientation="vertical" flexItem />
+              <Badge
+                color="warning"
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                variant="dot"
+              >
+                <Button variant="contained" startIcon={<SendTwoToneIcon />}>
+                  {t('Send')}
+                </Button>
+              </Badge>
+            </Box>
+          </Card>
+          </Slide>
+        )
 }
 
 export default Block5;

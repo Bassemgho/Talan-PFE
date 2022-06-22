@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import cors from "cors"
 import http from 'http'
+import morgan from 'morgan'
 import {Server} from 'socket.io'
 import authrouter from "./routes/auth.js"
 import errorHandler from "./middlewares/errorHandler.js";
@@ -10,6 +11,7 @@ import adminRouter from './routes/admin.js'
 import eventRouter from './routes/event.js'
 import protectsocket from './middlewares/socketprotection.js'
 import sockethandler from './socket/sockethandler.js'
+
 const app = express();
 const httpserver = http.createServer(app)
 export const io = new Server(httpserver,{
@@ -23,6 +25,7 @@ io.use(protectsocket)
 app.use(bodyParser.json({limit:"30mb",extended:true}));
 app.use(bodyParser.urlencoded({limit:"30mb",extended:true}));
 app.use(cors())
+app.use(morgan('dev'))
 app.use(authrouter)
 app.use(adminRouter)
 app.use(adminRouter)

@@ -65,7 +65,7 @@ function ManagementUsers() {
         spacing={4}
       >
         <Grid item xs={12}>
-          <Results users={users} />
+          <Results users={users} setUsers={setUsers} />
         </Grid>
       </Grid>
       <Footer />

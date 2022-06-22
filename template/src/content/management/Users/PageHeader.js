@@ -127,7 +127,7 @@ function PageHeader() {
             )}
           </Typography>
         </Grid>
-        <Grid item>
+        {user.role.titre === 'admin'? <Grid item>
           <Button
             sx={{
               mt: { xs: 2, sm: 0 }
@@ -138,7 +138,7 @@ function PageHeader() {
           >
             {t('Create user')}
           </Button>
-        </Grid>
+        </Grid>:null}
       </Grid>
       <Dialog
         fullWidth

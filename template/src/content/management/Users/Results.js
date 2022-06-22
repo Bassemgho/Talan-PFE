@@ -1,6 +1,8 @@
+/* eslint-disable */
 import { useState, forwardRef } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 import axios from 'axios'
 import {
   Avatar,
@@ -178,7 +180,7 @@ const applyPagination = (users, page, limit) => {
   return users.slice(page * limit, page * limit + limit);
 };
 
-const Results = ({ users }) => {
+const Results = ({ users ,setUsers}) => {
   const [selectedItems, setSelectedUsers] = useState([]);
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
@@ -189,18 +191,12 @@ console.log(users);
       value: 'all',
       label: t('All users')
     },
-    {
-      value: 'customer',
-      label: t('Customers')
-    },
+
     {
       value: 'admin',
       label: t('Administrators')
     },
-    {
-      value: 'subscriber',
-      label: t('Subscribers')
-    }
+
   ];
 
   const [page, setPage] = useState(0);
@@ -281,7 +277,9 @@ console.log(users);
     // console.log(ids);
     const res = await axios.post('http://localhost:5000/auth/deleteuser',{ids})
     if (res.data.success) {
-
+      setUsers((usrs) => {
+        return usrs.filter((usr)=> !(ids.includes(usr._id)) )
+      });
       enqueueSnackbar(t('The user account has been removed'), {
       variant: 'success',
       anchorOrigin: {

@@ -232,10 +232,10 @@ const getOptions = ()=>{
         try {
           const data = {
             allDay: values.allDay,
-            description: values.description,
-            end: values.end,
-            start: values.start,
-            title: values.title,
+            desc: values.description,
+            dateFin: values.end,
+            dateDebut: values.start,
+            titre: values.title,
             participants:values.participants,
             mods:values.mods
           };
@@ -243,7 +243,7 @@ const getOptions = ()=>{
           if (event) {
             dispatch(updateEvent(event._id, data));
           } else {
-            dispatch(createEvent(data));
+            dispatch(createEvent(values));
           }
 
           resetForm();

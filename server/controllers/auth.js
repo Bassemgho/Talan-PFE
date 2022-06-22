@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken'
 
 const map = { userRole: "6240d8b36d0ad04caca79f00" }
 
+
 const mail = process.env.MAILER_EMAIL_ID || 'talandev2022@gmail.com'
 const pass = process.env.MAILER_PASSWORD || 'PFEdev2023'
 let transport = nodemailer.createTransport({
@@ -17,7 +18,7 @@ let transport = nodemailer.createTransport({
       pass:pass,
       clientId:'834985114594-hd92eo90c1c65tm2liuii3cciatbqne9.apps.googleusercontent.com',
       clientSecret:'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',
-      refreshToken: '1//04HyRHbfgkUHCCgYIARAAGAQSNwF-L9IrUd3jNIhd1qIODQT0DoCpxD7694-W3fYiaHp_ilAtiIskXQuUuCtjJpUsiZXUe4EX8n0'
+      refreshToken: '1//04Ikdu-OWEwJfCgYIARAAGAQSNwF-L9IrPORSU-1DkQZNq0gq1S29otrB8Mqyi7J2tOg3pe2dv6v1S_aGDJburXVk-24hBaURlvg'
       // accessToken:'AIzaSyB4FFd9bZl1lT_l6Cff-7GfmCCrRx2IP4A'
   }
 });
@@ -74,7 +75,7 @@ export const forgot_password = async (req, res, next) => {
 
         const data = {
             to: user.email,
-            from: email,
+            from: mail,
             template: 'forgot-password-email',
             subject: 'Password help has arrived!',
             context: {
@@ -97,6 +98,27 @@ export const forgot_password = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
+}
+export const verifyActivationtoken = async (req, res, next) => {
+  const {token} = req.params
+  let secret = process.env.secret || "secretcode";
+  try {
+    let decoded = jwt.verify(token, secret)
+    const user = await users.findOne({ email: decoded.email, activation: token })
+    if (!user) {
+        return (res.status(404).json({ success: false, message: "token is invalid" }))
+    }
+    const usertoken = user.getsignedtoken()
+    res.status(201).json({success:true,message:"token your account is activated",token:usertoken})
+
+
+  } catch (e) {
+    return (next(e))
+
+  } finally {
+
+  }
+
 }
 export const deleteuser = async (req,res,next) =>{
   // console.log(req.body);
@@ -130,19 +152,31 @@ export const addUser = async (req, res, next) => {
         //still need to add user confirmation
         const user = await users.create({ email, password, role: map.userRole, firstname, lastname })
         if(user){
+            // transport.sendMail({
+            //     to: req.body.email,
+            //     from:email,
+            //     subject:"User Identification",
+            //     html:  `<p>Hello </strong><span style="text-transform:uppercase">${req.body.firstname}</span><strong></strong>, <p/>
+            //     <p>Welcome to to our Event Planning application at TALAN <br/>
+            //     <ul>
+            //     <li>Your Email is : \n<b>${req.body.email} </li> <br/>
+            //
+            //     </ul>
+            //     Best regards.
+            //     </p>`
+            //   })
             transport.sendMail({
-                to: req.body.email,
-                from:email,
-                subject:"User Identification",
-                html:  `<p>Hello </strong><span style="text-transform:uppercase">${req.body.firstname}</span><strong></strong>, <p/>
-                <p>Welcome to to our Event Planning application at TALAN <br/>
-                <ul>
-                <li>Your Email is : \n<b>${req.body.email} </li> <br/>
+              to:email,
+              from:mail,
+              subject:"User Registration",
+              template: 'activate-account',
+              context: {
+                url: `http://localhost:3000/auth/activate/` ,
+                name: user.firstname
 
-                </ul>
-                Best regards.
-                </p>`
-              })
+              }
+
+            })
         }
         else{
             return next(new errorResponse('some thing went wrong',501))

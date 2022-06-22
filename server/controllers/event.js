@@ -65,7 +65,13 @@ export const fetshallevents = async (req,res,next) => {
   }
  }
 export const updateEvent = async (req,res,next) => {
-  const {} = req.body
+  const {eventId,update} = req.body
+  try {
+    const ev = await events.findOneAndUpdate({_id:eventId},update, { returnDocument: 'after' })
+    res.status(201).json({success:true,event:ev})
+  } catch (e) {
+
+  }
 }
 export const addEvent = async (req, res, next) => {
   console.log('body',req.body)

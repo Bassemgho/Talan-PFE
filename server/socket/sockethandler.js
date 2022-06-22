@@ -89,11 +89,11 @@ console.log(users);
 socket.on('BE-accept-call', ({ signal, to }) => {
   io.to(to).emit('FE-call-accepted',{signal,answerId:socket.id})
 });
-socket.on('BE-send-message', async ({ eventid, msg, sender }) => {
+socket.on('BE-send-message', async ({ eventid, msg, sender,file }) => {
   const room = await findRoom(eventid)
   // console.log(sender);
 
-  const ms = await room.addMessage({msg,sender})
+  const ms = await room.addMessage({msg,sender,file})
   // console.log('message in server ',ms);
 // io.sockets.in(eventid).emit('FE-receive-message', { msg, sender });
 io.sockets.in(eventid).emit('FE-receive-message', { msg:ms });

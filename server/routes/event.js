@@ -6,6 +6,7 @@ import express from 'express'
 import multer from 'multer'
 import {getallpolls} from '../controllers/polls.js'
 import { fetshallevents ,fetshuserevents,deleteEvent,updateEvent} from "../controllers/event.js";
+import {getFile} from "../controllers/files.js"
 
 const storage = multer.diskStorage(
     {
@@ -19,6 +20,7 @@ const storage = multer.diskStorage(
 );
 const upload = multer({ storage: storage } )
 const router = express.Router();
+router.route('/events/fileinfo/:fileid').get(protect,getFile)
 router.route('/uploadfile/:eventid').post([protect,upload.single('attachement')],uploadfile)
 router.route('/getAllpolls').get(protect,getallpolls)
 router.route('/events/update').post(protect,updateEvent)

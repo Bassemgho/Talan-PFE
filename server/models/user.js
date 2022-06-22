@@ -44,6 +44,9 @@ const userSchema = mongoose.Schema({
     active:{
         type:"Boolean",
         default:false
+    },
+    activation:{
+      type:'String',
     }
 //activate
 })
@@ -64,12 +67,20 @@ userSchema.methods.getsignedtoken = function(){
     return jwt.sign({id:this._id},"secretcode",{expiresIn:"60min"})
 
 }
-userSchema.methods.generateResetToken = function(){
+userSchema.methods.generateResetToken = async  function(){
     let secret = "secretcode"
     this.resetpasswordtoken = jwt.sign({id:this._id,email:this.email},secret,{expiresIn:'2880min'})
-    this.save();
+    await this.save();
     return this.resetpasswordtoken
 
+
+
+}
+userSchema.methods.generateActivationToken = async function(){
+  let secret = "secretcode"
+  this.activation = jwt.sign({id:this._id,email:this.email},secret,{expiresIn:'2880min'})
+  await this.save();
+  return this.activation
 
 
 }

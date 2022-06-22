@@ -20,7 +20,7 @@ const roomSchema = mongoose.Schema({
 roomSchema.methods.addMessage = async function (message) {
   let msg
   try {
-     msg = await messages.create({sender:message.sender,text:message.msg})
+     msg = await messages.create({sender:message.sender,text:message.msg,attachement:message.file})
     this.messages.push(msg._id)
     console.log(msg);
     await this.save()

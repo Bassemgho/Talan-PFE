@@ -16,7 +16,7 @@ const messageSchema  = mongoose.Schema({
     required:[true,'please provide a text message']
 
   },
-  attachements:{
+  attachement:{
     type:mongoose.Schema.Types.ObjectId,
     ref:'files'
   }

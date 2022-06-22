@@ -5,7 +5,7 @@ import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-
+import Scrollbar from 'src/components/Scrollbar';
 
 import {
   Grid,
@@ -201,6 +201,8 @@ console.log(peers,peersRef);
   },[])
   function createUserVideo(peer, index, arr) {
   return (
+    <Grid item xs={12} md={6} lg={6}>
+
     <VideoBox
       className={`width-peer${peers.length > 8 ? '' : peers.length}`}
       onClick={expandScreen}
@@ -210,6 +212,9 @@ console.log(peers,peersRef);
       <FaIcon className='fas fa-expand' />
       <Video key={index} peer={peer} number={arr.length} />
     </VideoBox>
+    </Grid >
+
+
   );
 }
 function writeUserName(userName) {
@@ -397,6 +402,9 @@ const clickBackground = () => {
       <VideoAndBarContainer>
         <VideoContainer>
           {/* Current User Video */}
+          <Scrollbar>
+          <Grid container wrap="wrap" spacing={2}>
+            <Grid item xs={12} md={6} lg={6}>
           <VideoBox
             className={`width-peer${peers.length > 8 ? '' : peers.length}`}
           >
@@ -412,12 +420,15 @@ const clickBackground = () => {
               playInline
             />
           </VideoBox>
-          {/* Joined User Vidoe */}
-        </VideoContainer>
-        <UsersDisplay>
-        {peers &&
-          peers.map((peer, index, arr) => createUserVideo(peer, index, arr))}
-          </UsersDisplay>
+            </Grid>
+          {/* les autre utilisateurs */}
+          {peers &&
+            peers.map((peer, index, arr) => createUserVideo(peer, index, arr))}
+            </Grid >
+
+            </Scrollbar>
+          </VideoContainer>
+
         <BottomBarStyled
           clickScreenSharing={clickScreenSharing}
           clickChat={clickChat}
@@ -557,19 +568,6 @@ const clickBackground = () => {
                           variant="outlined"
                         />
                       </Grid>
-{/*                      <Grid item xs={12} md={6}>
-                        <TextField
-                          error={Boolean(touched.last_name && errors.last_name)}
-                          fullWidth
-                          helperText={touched.last_name && errors.last_name}
-                          label={t('Last name')}
-                          name="last_name"
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          value={values.last_name}
-                          variant="outlined"
-                        />
-                      </Grid>*/}
                       <Grid item xs={12}>
                         <TextField
                           error={Boolean(touched.answer2 && errors.answer2)}
@@ -598,18 +596,6 @@ const clickBackground = () => {
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
-                        {/*<Autocomplete
-                          disablePortal
-                          options={roles}
-                          getOptionLabel={(option) => option.label}
-                          renderInput={(params) => (
-                            <TextField
-                              fullWidth
-                              {...params}
-                              label={t('User role')}
-                            />
-                          )}
-                        />*/}
                       </Grid>
                     </Grid>
                   </Grid>
@@ -621,53 +607,12 @@ const clickBackground = () => {
                       flexDirection="column"
                       mt={3}
                     >
-{/*                      <AvatarWrapper>
-                        <Avatar
-                          variant="rounded"
-                          alt={user.name}
-                          src={user.avatar}
-                        />
-                        <ButtonUploadWrapper>
-                          <Input
-                            accept="image/*"
-                            id="icon-button-file"
-                            name="icon-button-file"
-                            type="file"
-                          />
-                          <label htmlFor="icon-button-file">
-                            <IconButton component="span" color="primary">
-                              <CloudUploadTwoToneIcon />
-                            </IconButton>
-                          </label>
-                        </ButtonUploadWrapper>
-                      </AvatarWrapper> */}
                       <Divider
                         flexItem
                         sx={{
                           m: 4
                         }}
                       />
-{/*                   <Box
-                        display="flex"
-                        alignItems="center"
-                        flexDirection="column"
-                        justifyContent="space-between"
-                      >
-                        <Typography
-                          variant="h4"
-                          sx={{
-                            pb: 1
-                          }}
-                        >
-                          {t('Public Profile')}
-                        </Typography>
-                        <Switch
-
-                          onChange={() => {}}
-                          name="public"
-                          color="primary"
-                        />
-                      </Box>*/}
                     </Box>
                   </Grid>
                 </Grid>
@@ -689,7 +634,7 @@ const clickBackground = () => {
                   disabled={Boolean(errors.submit) || isSubmitting}
                   variant="contained"
                 >
-                  {t('Add new user')}
+                  {t('Add new Vote')}
                 </Button>
               </DialogActions>
             </form>
@@ -706,6 +651,7 @@ const BottomBarStyled = materialStyled(BottomBar)(
 `    position: fixed;
 bottom: 0;
 width: 100%;
+transition: width 0.3s, height 0.3s, transform 0.3s;
 `  }
 )
 const RoomContainer = styled.div`
@@ -723,7 +669,7 @@ const VideoContainer = styled.div`
   max-width: 100%;
   height: 92%;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-around;
   flex-wrap: wrap;
   align-items: center;
