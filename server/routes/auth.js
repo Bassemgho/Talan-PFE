@@ -1,4 +1,4 @@
-import {addUser,changepassword,forgot_password,signin, verifyresettoken,getuser,deleteuser,verifyActivationtoken} from "../controllers/auth.js"
+import {addUser,changepassword,forgot_password,signin, verifyresettoken,getuser,deleteuser,verifyActivationtoken,changePasswordActivation} from "../controllers/auth.js"
 import { add_roles } from "../controllers/roles.js";
 import protectAdmin from '../middlewares/protectAdmin.js'
 import protect from '../middlewares/protect.js'
@@ -15,6 +15,7 @@ router.route("/auth/forgotpassword").post(forgot_password)
 router.route("/auth/changepassword").post(protect,changepassword)
 router.route("/auth/resetpassword/:token").put(verifyresettoken)
 router.route("/auth/activate/:token").get(verifyActivationtoken)
+router.route('/auth/activate/changepassword').post(protect,changePasswordActivation)
 // router.post('/addroles',add_roles)
 
 export default router

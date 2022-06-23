@@ -1,5 +1,25 @@
 import files from '../models/file.js'
 import messages from '../models/message.js'
+import events from '../models/event.js'
+import rooms from '../models/room.js'
+export getmyfiles = async (req,res,next)=> {
+  const {user} = req.user;
+  const id = user._id
+  // look for rooms;
+  try {
+    const evts = await events.find({$or:[{participants:id},{mods:id}]}).populate('participants').populate('mods')
+    const listevents = evts.map((event)=>{
+      return event._id
+    })
+    const roms = await rooms.find({_id:{$in:listevents}}).populate('files')
+    return res.status(201).json({success:true, rooms:roms})
+
+
+
+  }catch(err){
+    return(next(err))
+  }
+}
 export const getFile = async (req,res,next)=>{
   try{
     const {fileid} = req.params

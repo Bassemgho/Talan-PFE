@@ -32,6 +32,21 @@ let handlebarsOptions = {
     extName: '.html'
 };
 transport.use('compile', hbs(handlebarsOptions))
+export const changePasswordActivation = async (req,res,next)=>{
+  const user = req.user;
+  const {newpassword} = req.body;
+  try{
+    if(newpassword){
+      user.password = newpassword;
+      user.active= true
+      await user.save()
+      return res.status(201).json({success:true,user})
+    }
+
+  } catch(err){
+    return(next(err))
+  }
+}
 export const changepassword = async (req,res,next) => {
     const user = req.user
     const{newpassword} = req.body
@@ -54,7 +69,7 @@ export const verifyresettoken = async (req, res, next) => {
         if (!user) {
             return (res.status(404).json({ success: false, message: "token is invalid" }))
         }
-        const usertoken = user.getsignedtoken()
+        const usertoken = await user.getsignedtoken()
         res.status(201).json({success:true,message:"token is valid,you may proceed to change your password",token:usertoken})
     } catch (error) {
         return (next(error))
@@ -165,13 +180,14 @@ export const addUser = async (req, res, next) => {
             //     Best regards.
             //     </p>`
             //   })
+            const token = await user.generateActivationToken()
             transport.sendMail({
               to:email,
               from:mail,
               subject:"User Registration",
               template: 'activate-account',
               context: {
-                url: `http://localhost:3000/auth/activate/` ,
+                url: `http://localhost:3000/auth/activate/${token}/` ,
                 name: user.firstname
 
               }

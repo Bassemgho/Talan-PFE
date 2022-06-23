@@ -2,6 +2,8 @@
 import Authenticated from 'src/components/Authenticated';
 import { Navigate } from 'react-router-dom';
 import Room from 'src/components/Room/Room'
+import ChangePass from 'src/content/pages/ChangePass'
+import Activated from 'src/components/Activated'
 // import SuspenseLoader from 'src/components/SuspenseLoader';
 
 // import BoxedSidebarLayout from 'src/layouts/BoxedSidebarLayout';
@@ -58,7 +60,9 @@ const router = [
     path: 'extended-sidebar',
     element: (
       <Authenticated>
+      <Activated>
         <ExtendedSidebarLayout />
+        </Activated >
       </Authenticated>
     ),
     children: [
@@ -73,8 +77,16 @@ const router = [
       {
         path: 'management',
         children: managementRoutes
-      }
-    ]
+      },
+
+    ],
+
+  },
+  {
+    path:'auth/activate/:token/',
+    element:(
+      <ChangePass />
+    )
   }
 ];
 export default router;

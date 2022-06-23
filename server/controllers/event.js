@@ -88,13 +88,14 @@ export const addEvent = async (req, res, next) => {
           console.log('val,',val);
             usrs[ind]  = val._id
          })
-        console.log('users,',usrs)
-        const event = await events.create({titre,participants:usrs,mods:usrs,dateDebut,dateFin,desc})
+         const sendto = [...new Set([...participants,...mods])]
+        console.log('sendto,',sendto)
+        const event = await events.create({titre,participants:usrs,mods:usrs,dateDebut,dateFin,desc,createdby:req.user._id})
         const evts = await events.find({})
 
         // send emails to participants and mods
         const data = {
-            to: participants,
+            to: sendto,
             // from: email,
             // template: 'forgot-password-email',
             subject: 'you are invited to an event!',

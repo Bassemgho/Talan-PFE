@@ -31,6 +31,10 @@ const eventSchema = mongoose.Schema({
             ref:'users'
         }
     ],
+    createdby:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'users'
+    }
     //to add votes in the future
     //to add messages
     //to addfeetback in future
