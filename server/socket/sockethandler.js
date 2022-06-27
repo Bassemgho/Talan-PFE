@@ -3,8 +3,22 @@ import rooms from '../models/room.js'
 import message from '../models/message.js'
 import polls from '../models/poll.js'
 import optionsDB from '../models/option.js'
+// import users from '../models/user.js'
 import {io } from '../index.js'
 let socketList = {}
+const checkMod = async function (id,eventid) {
+  try {
+    const event = await events.findOne({_id:eventid,mods:id})
+    if (event!=null) {
+      return true
+
+    }
+    return false
+  } catch (e) {
+    console.log(e);
+  }
+
+}
 const findRoom = async function (id,select=false) {
   try {
     // const evet = await events.findOne({_id:id})
@@ -46,10 +60,10 @@ const sockethandler =  (socket)=>{
       socket.emit('FE-error-user-exist', { error });
     });
   })
-  socket.on('BE-join-room',async ({eventid})=>{
+  socket.on('BE-join-room',async ( {eventid})=>{
     socket.join(eventid)
-
-    socketList[socket.id.toString()]= {userName:`${socket.user.firstname} ${socket.user.lastname}`,avatar:socket.user.avatar,video:true, audio:true}
+    const isMod = await checkMod(socket.user._id,eventid)
+    socketList[socket.id.toString()]= {userName:`${socket.user.firstname} ${socket.user.lastname}`,avatar:socket.user.avatar,video:true, audio:true,isMod}
     console.log('soocketlist',socketList);
     try {
       const users = []
@@ -100,11 +114,16 @@ io.sockets.in(eventid).emit('FE-receive-message', { msg:ms });
 
 });
 socket.on('BE-leave-room', ({ eventid, leaver }) => {
-  delete socketList[socket.id];
+  console.log(leaver);
+  console.log(socket.id);
+  console.log(io.sockets);
+
     socket.broadcast
       .to(eventid)
       .emit('FE-user-leave', { userId: socket.id, userName: [socket.id] });
-    io.sockets.sockets[socket.id].leave(eventid);
+      socket.leave(eventid)
+    // io.sockets.sockets[socket.id.toString()].leave(eventid);
+    delete socketList[socket.id];
 });
 
   socket.on('BE-toggle-camera-audio', ({ eventid, switchTarget }) => {

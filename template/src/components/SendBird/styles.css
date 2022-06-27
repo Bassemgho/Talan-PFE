@@ -1,0 +1,12 @@
+
+.customized-app {
+  width: 100%;
+}
+
+/* will be duplicated */
+.sendbird-channel-preview__avatar .sendbird-chat-header__avatar {
+}
+.sendbird-channel-preview__avatar
+  .sendbird-chat-header__avatar
+  .sendbird-image-renderer.sendbird-avatar-img {
+}

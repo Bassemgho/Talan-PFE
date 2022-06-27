@@ -442,7 +442,7 @@ const clickBackground = () => {
           setShowVideoDevices={setShowVideoDevices}
         />
       </VideoAndBarContainer>
-      <Chat peersRef={peersRef} display={displayChat} eventid={eventid} socket={socketRef} />
+      <Chat peersRef={peers} display={displayChat} eventid={eventid} socket={socketRef} />
       <Dialog
         fullWidth
         maxWidth="md"

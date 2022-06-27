@@ -20,6 +20,7 @@ const storage = multer.diskStorage(
 );
 const upload = multer({ storage: storage } )
 const router = express.Router();
+
 router.route('/events/fileinfo/:fileid').get(protect,getFile)
 router.route('/uploadfile/:eventid').post([protect,upload.single('attachement')],uploadfile)
 router.route('/getAllpolls').get(protect,getallpolls)

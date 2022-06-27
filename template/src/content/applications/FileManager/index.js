@@ -1,4 +1,6 @@
+/* eslint-disable */
 import { useState } from 'react';
+
 import { Helmet } from 'react-helmet-async';
 import {
   Box,
@@ -36,6 +38,7 @@ const DrawerWrapper = styled(Drawer)(
     }
 `
 );
+
 
 const DrawerWrapperMobile = styled(Drawer)(
   ({ theme }) => `
@@ -142,19 +145,9 @@ function ApplicationsFileManager() {
           open={mobileOpen}
           onClose={handleDrawerToggle}
         >
-          {sidebarContent}
+
         </DrawerWrapperMobile>
-        <DrawerWrapper
-          className="MuiDrawer-fm"
-          sx={{
-            display: { xs: 'none', lg: 'inline-block' }
-          }}
-          variant="permanent"
-          anchor={theme.direction === 'rtl' ? 'left' : 'right'}
-          open
-        >
-          {sidebarContent}
-        </DrawerWrapper>
+
       </Box>
     </>
   );

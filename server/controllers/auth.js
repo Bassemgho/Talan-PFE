@@ -4,8 +4,12 @@ import nodemailer from 'nodemailer'
 import hbs from 'nodemailer-express-handlebars'
 import path from 'path'
 import jwt from 'jsonwebtoken'
-
+import axios from 'axios'
+import fetch from 'node-fetch'
+const URL = "https://api-EFA04A76-651F-42F6-BDD9-E873BF60E605.sendbird.com"
+const TOKEN = "070722869dd3813e77f5b23702f0f27915d1cbc4"
 const map = { userRole: "6240d8b36d0ad04caca79f00" }
+
 
 
 const mail = process.env.MAILER_EMAIL_ID || 'talandev2022@gmail.com'
@@ -32,6 +36,24 @@ let handlebarsOptions = {
     extName: '.html'
 };
 transport.use('compile', hbs(handlebarsOptions))
+
+axios.interceptors.request.use(function(config) {
+  console.log('request => config ====================================');
+  console.log(config);
+  console.log('request => config ====================================');
+
+  // if u add new Chainable promise or other interceptor
+  // You have to return `config` inside of a rquest
+  // otherwise u will get a very confusing error
+  // and spend sometime to debug it.
+  return config;
+}, function(error) {
+  return Promise.reject(error);
+});
+axios.interceptors.response.use((response) => {
+  console.log('response',JSON.stringify(response,null,2));
+  return response
+})
 export const changePasswordActivation = async (req,res,next)=>{
   const user = req.user;
   const {newpassword} = req.body;
@@ -86,7 +108,7 @@ export const forgot_password = async (req, res, next) => {
         if (!user) {
             return next(new errorResponse('no user was found', 404))
         }
-        let token = user.generateResetToken();
+        let token = await user.generateResetToken();
 
         const data = {
             to: user.email,
@@ -123,11 +145,29 @@ export const verifyActivationtoken = async (req, res, next) => {
     if (!user) {
         return (res.status(404).json({ success: false, message: "token is invalid" }))
     }
+    const body ={
+    user_id: user._id,
+    nickname:`${user.firstname} ${user.lastname}`,
+    profile_url:'',
+    issue_access_token: true
+}
+
+fetch(`${URL}/v3/users`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json',"Api-Token":TOKEN }
+}).then(res => res.json())
+  .then(json => console.log(json));
+    // const response = await axios.post(`${URL}/v3/users`,body,	{headers: {"Api-Token":TOKEN,"Content-Type":"application/json"}})
+    // const data = await response.json();
+    // console.log('data',response.data);
+
     const usertoken = user.getsignedtoken()
     res.status(201).json({success:true,message:"token your account is activated",token:usertoken})
 
 
   } catch (e) {
+    console.log('error',e);
     return (next(e))
 
   } finally {
@@ -217,7 +257,8 @@ export const signin = async (req, res, next) => {
         if (!user) {
             return next(new errorResponse("no user was found", 404))
         }
-        const isMatch = user.matchpasswords(password)
+        const isMatch = await user.matchpasswords(password)
+        console.log('ismattch',isMatch);
         if (!isMatch) {
             return (next("password is incorrect", 401));
         }

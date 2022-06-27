@@ -13,7 +13,7 @@ router.route('/auth/deleteuser').post(protectAdmin,deleteuser)
 router.route("/auth/adduser").post(protectAdmin,addUser);
 router.route("/auth/forgotpassword").post(forgot_password)
 router.route("/auth/changepassword").post(protect,changepassword)
-router.route("/auth/resetpassword/:token").put(verifyresettoken)
+router.route("/auth/resetpassword/:token").get(verifyresettoken)
 router.route("/auth/activate/:token").get(verifyActivationtoken)
 router.route('/auth/activate/changepassword').post(protect,changePasswordActivation)
 // router.post('/addroles',add_roles)

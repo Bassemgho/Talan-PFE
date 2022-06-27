@@ -1,11 +1,11 @@
 import { combineReducers } from '@reduxjs/toolkit';
 import { reducer as calendarReducer } from 'src/slices/calendar';
-import { reducer as mailboxReducer } from 'src/slices/mailbox';
+import { reducer as mailboxReducer } from 'src/slices/messenger';
 
 const rootReducer = combineReducers({
   calendar: calendarReducer,
 
-  mailbox: mailboxReducer
+  messenger: mailboxReducer
 });
 
 export default rootReducer;

@@ -4,6 +4,7 @@ import {SocketContext} from 'src/contexts/SocketContext.js'
 import MoreHorizTwoToneIcon from '@mui/icons-material/MoreHorizTwoTone';
 import TextSnippetTwoToneIcon from '@mui/icons-material/TextSnippetTwoTone';
 
+
 import {
   Box,
   Card,
@@ -20,6 +21,7 @@ import {
   Slide,
   CircularProgress,
   CardActionArea,
+  CardContent,
   CardActions,
   Tabs,
   Tab,
@@ -36,6 +38,7 @@ import Scrollbar from 'src/components/Scrollbar';
 import AttachFileTwoToneIcon from '@mui/icons-material/AttachFileTwoTone';
 import SendTwoToneIcon from '@mui/icons-material/SendTwoTone';
 import ScheduleTwoToneIcon from '@mui/icons-material/ScheduleTwoTone';
+import Online from './Block10'
 // import socket from 'src/socket'
 
 
@@ -91,6 +94,16 @@ const TabsWrapper = styled(Tabs)(
     }
 `
 );
+const TabsContainerWrapper = styled(CardContent)(
+  ({ theme }) => `
+        background-color: ${theme.colors.alpha.black[5]};
+
+        .MuiTabs-flexContainer {
+            justify-content: center;
+        }
+  `
+);
+
 
 const CardActionAreaWrapper = styled(CardActionArea)(
   ({ theme }) => `
@@ -295,15 +308,6 @@ function MyMessage({text,time,message}) {
           })}
         </Typography>
       </Box>
-      <Avatar
-        variant="rounded"
-        sx={{
-          width: 50,
-          height: 50
-        }}
-        alt={user.name}
-        src={user.avatar}
-      />
     </Box>
   );
 }
@@ -314,7 +318,7 @@ function Block5({display,eventid,peersRef}) {
   const {getSocket} = useContext(SocketContext);
   const socket = getSocket();
   const w = display ? '':'0px'
-  const [currentTab, setCurrentTab] = useState('messenger');
+  const [currentTab, setCurrentTab] = useState('messanger');
   const [msgs, setMsg] = useState([]);
   const [finished,setfinished] = useState(false)
   const messagesEndRef = useRef();
@@ -425,7 +429,6 @@ console.log(msgs);
   <Slide direction= 'left' in={display } mountOnEnter unmountOnExit  >
 
           <Card  >
-          <Button onClick={() => {console.log(selectedFile);}}> log messages </Button>
             <Box
               p={2}
               display="flex"
@@ -433,6 +436,20 @@ console.log(msgs);
               justifyContent="space-between"
             >
               <Box>
+              <TabsContainerWrapper>
+                <Tabs
+                  onChange={handleTabsChange}
+                  value={currentTab}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  textColor="primary"
+                  indicatorColor="primary"
+                >
+                  {tabs.map((tab) => (
+                    <Tab key={tab.value} label={tab.label} value={tab.value} />
+                  ))}
+                </Tabs>
+              </TabsContainerWrapper>
                 <Typography
                   sx={{
                     pb: 1
@@ -440,7 +457,7 @@ console.log(msgs);
                   variant="caption"message
                   fontWeight="bold"
                 >
-                  {t('Messenger')}
+                  {t(currentTab)}
                 </Typography>
                 {/* <Typography variant="h4">{t('Talking to Kate')}</Typography> */}
               </Box>
@@ -449,6 +466,8 @@ console.log(msgs);
               </IconButton>
             </Box>
             <Divider />
+{ currentTab=='messanger' &&
+           <>
             <Box
               sx={{
                 height: 487
@@ -473,6 +492,7 @@ console.log(msgs);
                 </Box>
               </Scrollbar>
             </Box>
+
             <Divider />
             <CardWrapper
               sx={{
@@ -500,7 +520,6 @@ console.log(msgs);
               <Typography variant="subtitle2">
                 {t('Posting as')}{' '}
                 <Typography component="span" color="text.primary">
-                  <b>Emma Taylor</b>
                 </Typography>
               </Typography>
             </CardWrapper>
@@ -549,6 +568,25 @@ console.log(msgs);
                 </Button>
               </Badge>
             </Box>
+            </>
+          }
+          {currentTab=='all users' &&
+          <>
+            <Box
+            sx={{
+              height: 487
+            }}
+            >
+            <Button onClick={()=>{console.log(peersRef);}}>log</Button>
+            <Scrollbar>
+            <Online peers={peersRef} />
+            </Scrollbar>
+
+            </Box>
+          </>
+
+          }
+
           </Card>
           </Slide>
         )

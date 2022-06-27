@@ -1,6 +1,15 @@
-import { useState } from 'react';
+/*eslint-disable*/
+import { useState,useEffect,useRef } from 'react';
 import {
   Box,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  Zoom,
+  CircularProgress,
   Typography,
   FormControlLabel,
   Switch,
@@ -21,6 +30,12 @@ import {
   lighten,
   styled
 } from '@mui/material';
+import { useDispatch, useSelector } from 'src/store';
+
+import {
+  getUsers,createChat
+} from 'src/slices/messenger';
+
 import useAuth from 'src/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { formatDistance, subMinutes, subHours } from 'date-fns';
@@ -29,7 +44,19 @@ import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import Label from 'src/components/Label';
 import CheckTwoToneIcon from '@mui/icons-material/CheckTwoTone';
 import AlarmTwoToneIcon from '@mui/icons-material/AlarmTwoTone';
+// import SendTwoToneIcon from '@mui/icons-material/SendTwoTone';
+import AddCircleTwoToneIcon from '@mui/icons-material/AddCircleTwoTone';
+
 import { Link as RouterLink } from 'react-router-dom';
+import  Select from 'react-select'
+
+const CustomSelect = styled(Select)(
+  ({ theme })=>`
+    margin-top:10px;
+    margin-bottom:10px;
+
+    `)
+
 
 const AvatarSuccess = styled(Avatar)(
   ({ theme }) => `
@@ -93,10 +120,53 @@ const TabsContainerWrapper = styled(Box)(
         }
   `
 );
+const Item = (participants)=>{
+  return (
+    <ListItemWrapper selected>
+      <ListItemAvatar>
+        <Avatar src="/static/images/avatars/1.jpg" />
+      </ListItemAvatar>
+      <ListItemText
+        sx={{
+          mr: 1
+        }}
+        primaryTypographyProps={{
+          color: 'textPrimary',
+          variant: 'h5',
+          noWrap: true
+        }}
+        secondaryTypographyProps={{
+          color: 'textSecondary',
+          noWrap: true
+        }}
+        primary={participants.firstname+' '+participants.lastname}
+      />
+      <Label color="primary">
+        <b>2</b>
+      </Label>
+    </ListItemWrapper>
+
+  );
+}
 
 function SidebarContent() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const dispatch = useDispatch();
+  const selectRef = useRef()
+  const {users,chats} = useSelector(
+    (state) => state.messenger
+  );
+  console.log(users);
+  useEffect(() => {
+    try {
+
+      dispatch(getUsers());
+    } catch (e) {
+      console.log(e.message);
+    }
+  }, [dispatch]);
+
 
   const [state, setState] = useState({
     invisible: true
@@ -110,21 +180,38 @@ function SidebarContent() {
   };
 
   const [currentTab, setCurrentTab] = useState('all');
-
+  const [participants,setParticipants] = useState([])
+  const [isOpen,setOpen] = useState(false)
+  const onOpen = () => {
+    setOpen(true)
+  }
+  const onClose = () => {
+    setOpen(false)
+  }
   const tabs = [
     { value: 'all', label: t('All') },
-    { value: 'unread', label: t('Unread') },
-    { value: 'archived', label: t('Archived') }
   ];
 
   const handleTabsChange = (_event, value) => {
     setCurrentTab(value);
   };
+  const getOptions = (users=[])=>{
+    const options = users.map((user,index)=>{
+      return {label:`${user.firstname} ${user.lastname}`,value:user._id}
 
+    })
+    console.log(options);
+    return options
+
+}
+const handleSubmit = () => {
+  console.log('select',participants);
+  dispatch(createChat(participants))
+}
   return (
     <RootWrapper>
       <Box display="flex" alignItems="flex-start">
-        <Avatar alt={user.name} src={user.avatar} />
+        <Avatar alt={user.firstname} src={user.avatar} />
         <Box
           sx={{
             ml: 1.5,
@@ -138,10 +225,10 @@ function SidebarContent() {
           >
             <Box>
               <Typography variant="h5" noWrap>
-                {user.name}
+                {user.firstname}
               </Typography>
               <Typography variant="subtitle1" noWrap>
-                {user.jobtitle}
+              Software engineer
               </Typography>
             </Box>
             <IconButton
@@ -155,17 +242,7 @@ function SidebarContent() {
             </IconButton>
           </Box>
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={state.invisible}
-                onChange={handleChange}
-                name="invisible"
-                color="primary"
-              />
-            }
-            label={t('Invisible')}
-          />
+
         </Box>
       </Box>
 
@@ -185,7 +262,7 @@ function SidebarContent() {
         }}
         placeholder={t('Search...')}
       />
-
+<Box display='flex'>
       <Typography
         sx={{
           mb: 1,
@@ -195,6 +272,11 @@ function SidebarContent() {
       >
         {t('Chats')}
       </Typography>
+      <IconButton onClick={onOpen} color="primary">
+        <AddCircleTwoToneIcon />
+      </IconButton>
+      </Box>
+
 
       <TabsContainerWrapper>
         <Tabs
@@ -214,176 +296,53 @@ function SidebarContent() {
       <Box mt={2}>
         {currentTab === 'all' && (
           <List disablePadding component="div">
-            <ListItemWrapper selected>
-              <ListItemAvatar>
-                <Avatar src="/static/images/avatars/1.jpg" />
-              </ListItemAvatar>
-              <ListItemText
-                sx={{
-                  mr: 1
-                }}
-                primaryTypographyProps={{
-                  color: 'textPrimary',
-                  variant: 'h5',
-                  noWrap: true
-                }}
-                secondaryTypographyProps={{
-                  color: 'textSecondary',
-                  noWrap: true
-                }}
-                primary="Zain Baptista"
-                secondary="Hey there, how are you today? Is it ok if I call you?"
-              />
-              <Label color="primary">
-                <b>2</b>
-              </Label>
-            </ListItemWrapper>
-            <ListItemWrapper>
-              <ListItemAvatar>
-                <Avatar src="/static/images/avatars/2.jpg" />
-              </ListItemAvatar>
-              <ListItemText
-                sx={{
-                  mr: 1
-                }}
-                primaryTypographyProps={{
-                  color: 'textPrimary',
-                  variant: 'h5',
-                  noWrap: true
-                }}
-                secondaryTypographyProps={{
-                  color: 'textSecondary',
-                  noWrap: true
-                }}
-                primary="Kierra Herwitz"
-                secondary="Hi! Did you manage to send me those documents"
-              />
-            </ListItemWrapper>
-            <ListItemWrapper>
-              <ListItemAvatar>
-                <Avatar src="/static/images/avatars/3.jpg" />
-              </ListItemAvatar>
-              <ListItemText
-                sx={{
-                  mr: 1
-                }}
-                primaryTypographyProps={{
-                  color: 'textPrimary',
-                  variant: 'h5',
-                  noWrap: true
-                }}
-                secondaryTypographyProps={{
-                  color: 'textSecondary',
-                  noWrap: true
-                }}
-                primary="Craig Vaccaro"
-                secondary="Ola, I still haven't received the program schedule"
-              />
-            </ListItemWrapper>
-            <ListItemWrapper>
-              <ListItemAvatar>
-                <Avatar src="/static/images/avatars/4.jpg" />
-              </ListItemAvatar>
-              <ListItemText
-                sx={{
-                  mr: 1
-                }}
-                primaryTypographyProps={{
-                  color: 'textPrimary',
-                  variant: 'h5',
-                  noWrap: true
-                }}
-                secondaryTypographyProps={{
-                  color: 'textSecondary',
-                  noWrap: true
-                }}
-                primary="Adison Press"
-                secondary="I recently did some buying on Amazon and now I'm stuck"
-              />
-              <Label color="primary">
-                <b>8</b>
-              </Label>
-            </ListItemWrapper>
+          {chats && chats.map((chat) => {
+            <Item participants={chat.participants[0]} />
+          })}
           </List>
         )}
-        {currentTab === 'unread' && (
-          <List disablePadding component="div">
-            <ListItemWrapper>
-              <ListItemAvatar>
-                <Avatar src="/static/images/avatars/1.jpg" />
-              </ListItemAvatar>
-              <ListItemText
-                sx={{
-                  mr: 1
-                }}
-                primaryTypographyProps={{
-                  color: 'textPrimary',
-                  variant: 'h5',
-                  noWrap: true
-                }}
-                secondaryTypographyProps={{
-                  color: 'textSecondary',
-                  noWrap: true
-                }}
-                primary="Zain Baptista"
-                secondary="Hey there, how are you today? Is it ok if I call you?"
-              />
-              <Label color="primary">
-                <b>2</b>
-              </Label>
-            </ListItemWrapper>
-            <ListItemWrapper>
-              <ListItemAvatar>
-                <Avatar src="/static/images/avatars/4.jpg" />
-              </ListItemAvatar>
-              <ListItemText
-                sx={{
-                  mr: 1
-                }}
-                primaryTypographyProps={{
-                  color: 'textPrimary',
-                  variant: 'h5',
-                  noWrap: true
-                }}
-                secondaryTypographyProps={{
-                  color: 'textSecondary',
-                  noWrap: true
-                }}
-                primary="Adison Press"
-                secondary="I recently did some buying on Amazon and now I'm stuck"
-              />
-              <Label color="primary">
-                <b>8</b>
-              </Label>
-            </ListItemWrapper>
-          </List>
-        )}
-        {currentTab === 'archived' && (
-          <Box pb={3}>
-            <Divider
-              sx={{
-                mb: 3
-              }}
-            />
-            <AvatarSuccess>
-              <CheckTwoToneIcon />
-            </AvatarSuccess>
-            <Typography
-              sx={{
-                mt: 2,
-                textAlign: 'center'
-              }}
-              variant="subtitle2"
-            >
-              {t('Hurray! There are no archived chats!')}
-            </Typography>
-            <Divider
-              sx={{
-                mt: 3
-              }}
-            />
+        <Dialog
+        fullWidth
+        maxWidth="md"
+        open={isOpen}
+        onClose={onClose}
+        >
+        <DialogContent>
+          <Box sx={{height:180}}>
+          <CustomSelect
+            ref = {selectRef}
+            className = 'select'
+            isMulti
+            options={getOptions(users)}
+            fullWidth
+            placeholder={t('Event Participants')}
+            name="participants"
+            margin="normal"
+            onChange={(e) => {
+              setParticipants(e)
+            }}
+            variant="outlined"
+          />
+
           </Box>
-        )}
+        </DialogContent>
+        <DialogActions
+        sx={{
+          p: 3
+        }}>
+        <Button color="secondary" onClick={onClose}>
+          {t('Cancel')}
+        </Button>
+        <Button
+          type="submit"
+          onClick={handleSubmit}
+          variant="contained"
+        >
+          {t('create chat')}
+        </Button>
+
+        </DialogActions>
+        </Dialog>
       </Box>
       <Box display="flex" pb={1} mt={4} alignItems="center">
         <Typography

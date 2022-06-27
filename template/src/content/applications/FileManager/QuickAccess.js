@@ -1,4 +1,6 @@
-import { useState } from 'react';
+/* eslint-disable */
+import { useState ,useEffect , useCallback} from 'react';
+import axios from 'axios'
 import {
   Card,
   Box,
@@ -23,6 +25,9 @@ import {
   useTheme,
   TableContainer
 } from '@mui/material';
+import Carousel from 'react-material-ui-carousel'
+import Scrollbar from 'src/components/Scrollbar';
+
 import { useTranslation } from 'react-i18next';
 import { formatDistance, subDays } from 'date-fns';
 
@@ -68,10 +73,93 @@ const CardActionAreaWrapper = styled(CardActionArea)(
       }
 `
 );
+function FileCard({attachement,action}){
+  const theme = useTheme();
+  const { t } = useTranslation();
+  const [filename,setFilename] = useState('')
+  const [created,setCreated] = useState(new Date())
+  const [uploader,setUploader] = useState('')
+
+  const getFileInfo = useCallback(async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/events/fileinfo/${attachement}`)
+      if (response.data.success==true) {
+        setFilename(response.data.name)
+        setCreated(response.data.updatedAt)
+        setUploader(response.data.uploader)
+      }
+    }catch (err){
+      alert(err)
+    }
+  })
+  useEffect(()=>{
+    getFileInfo()
+  },[getFileInfo])
+
+
+  return (
+    // <Grid item xs={12} sm={6}>
+      <Card>
+        <CardActionAreaWrapper onClick={action}>
+          <Typography
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: `${theme.typography.pxToRem(55)}`
+            }}
+            color="text.secondary"
+          >
+            <TextSnippetTwoToneIcon fontSize="inherit" />
+          </Typography>
+        </CardActionAreaWrapper>
+        <Divider />
+        <CardActions
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 2
+          }}
+        >
+          <Box>
+            <Box display="flex" alignItems="center" pb={0.5}>
+              <TextSnippetTwoToneIcon />
+              <Typography
+                sx={{
+                  pl: 1
+                }}
+                fontWeight="bold"
+                variant="h6"
+              >
+                {filename}
+              </Typography>
+            </Box>
+            <Typography component="span" variant="subtitle1">
+              {t('Edited')}{' '}
+              {formatDistance((new Date(created)||subDays(new Date(), 3)), new Date(), {
+                addSuffix: true
+              })}{' '}
+              {t('by')}{uploader}
+            </Typography>
+          </Box>
+          <IconButton size="small" color="primary">
+            <MoreHorizTwoToneIcon />
+          </IconButton>
+        </CardActions>
+      </Card>
+    // {/*</Grid>*/}
+
+  )
+}
+
 
 function QuickAccess() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const [rooms,setRooms] = useState([])
+  const [selectedFile,setSelectedFile] = useState('')
+  const [stop,setStop] = useState(false)
 
   const [tabs, setTab] = useState('grid_view');
 
@@ -81,9 +169,53 @@ function QuickAccess() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleDrawerToggle = () => {
+  const handleDrawerToggle = (file) => {
+    console.log('file',file);
+    setSelectedFile(file)
     setMobileOpen(!mobileOpen);
   };
+  const getMyFiles = useCallback(async()=>{
+    try{
+      console.log('before id');
+
+      if(rooms.length==0 && !stop){
+        // console.log('after id');
+        setStop(true)
+        const response = await axios.get('http://localhost:5000/files/getuserfiles');
+        if(response.data.success==true){
+          setRooms(response.data.rooms)
+        }
+      }
+
+    }catch(err){
+      alert(err)
+    }
+  })
+  useEffect(()=>{getMyFiles()},[getMyFiles])
+  const showFiles = (rooms)=>{
+      rooms.map(room => {
+return(
+        <Card>
+        <Typography
+        sx={{
+          pl: 1
+        }}
+        fontWeight="bold"
+        variant="h6"
+        color='black'
+        >
+hello
+        </Typography>
+        {room.files.map((file)=>{
+
+          <FileCard attachement={file} />
+        })
+}
+</Card>
+)      })
+
+  }
+
 
   return (
     <>
@@ -109,202 +241,51 @@ function QuickAccess() {
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
+
       <Grid container spacing={3}>
+
         {tabs === 'grid_view' && (
-          <>
-            <Grid item xs={12} sm={6}>
-              <Card>
-                <CardActionAreaWrapper onClick={handleDrawerToggle}>
-                  <Typography
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: `${theme.typography.pxToRem(55)}`
-                    }}
-                    color="text.secondary"
-                  >
-                    <TextSnippetTwoToneIcon fontSize="inherit" />
-                  </Typography>
-                </CardActionAreaWrapper>
-                <Divider />
-                <CardActions
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 2
-                  }}
-                >
-                  <Box>
-                    <Box display="flex" alignItems="center" pb={0.5}>
-                      <TextSnippetTwoToneIcon />
-                      <Typography
-                        sx={{
-                          pl: 1
-                        }}
-                        fontWeight="bold"
-                        variant="h6"
-                      >
-                        FileTransfer.txt
-                      </Typography>
-                    </Box>
-                    <Typography component="span" variant="subtitle1">
-                      {t('Edited')}{' '}
-                      {formatDistance(subDays(new Date(), 3), new Date(), {
-                        addSuffix: true
-                      })}{' '}
-                      {t('by')}{' '}
-                    </Typography>
-                    <Link href="#">Kate</Link>
-                  </Box>
-                  <IconButton size="small" color="primary">
-                    <MoreHorizTwoToneIcon />
-                  </IconButton>
-                </CardActions>
-              </Card>
+          rooms.length>0 ?rooms.map((room)=>{
+            return (
+              <Grid item xs={12} sm={12}>
+              <Box>
+{room.files.length>0 ?
+      <Typography
+              sx={{
+                pl: 1
+              }}
+              fontWeight="bold"
+              variant="h6"
+              >
+              {room.event.titre}
+
+              </Typography>:null}
+              <Carousel>
+{              room.files.map((file)=>
+    <FileCard  action={()=>handleDrawerToggle(file)} attachement={file} />
+
+              )}
+              </Carousel>
+            </Box>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Card>
-                <CardActionAreaWrapper onClick={handleDrawerToggle}>
-                  <img
-                    src="/static/images/placeholders/fitness/4.jpg"
-                    alt="..."
-                  />
-                </CardActionAreaWrapper>
-                <Divider />
-                <CardActions
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 2
-                  }}
-                >
-                  <Box>
-                    <Box display="flex" alignItems="center" pb={0.5}>
-                      <TextSnippetTwoToneIcon />
-                      <Typography
-                        sx={{
-                          pl: 1
-                        }}
-                        fontWeight="bold"
-                        variant="h6"
-                      >
-                        2021Screenshot.jpg
-                      </Typography>
-                    </Box>
-                    <Typography component="span" variant="subtitle1">
-                      {t('Edited')}{' '}
-                      {formatDistance(subDays(new Date(), 4), new Date(), {
-                        addSuffix: true
-                      })}{' '}
-                      {t('by')}{' '}
-                    </Typography>
-                    <Link href="#">John</Link>
-                  </Box>
-                  <IconButton size="small" color="primary">
-                    <MoreHorizTwoToneIcon />
-                  </IconButton>
-                </CardActions>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Card>
-                <CardActionAreaWrapper onClick={handleDrawerToggle}>
-                  <Typography
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: `${theme.typography.pxToRem(55)}`
-                    }}
-                    color="text.secondary"
-                  >
-                    <PictureAsPdfTwoToneIcon fontSize="inherit" />
-                  </Typography>
-                </CardActionAreaWrapper>
-                <Divider />
-                <CardActions
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 2
-                  }}
-                >
-                  <Box>
-                    <Box display="flex" alignItems="center" pb={0.5}>
-                      <PictureAsPdfTwoToneIcon />
-                      <Typography
-                        sx={{
-                          pl: 1
-                        }}
-                        fontWeight="bold"
-                        variant="h6"
-                      >
-                        PresentationDeck.pdf
-                      </Typography>
-                    </Box>
-                    <Typography component="span" variant="subtitle1">
-                      {t('Never opened')}
-                    </Typography>
-                  </Box>
-                  <IconButton size="small" color="primary">
-                    <MoreHorizTwoToneIcon />
-                  </IconButton>
-                </CardActions>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Card>
-                <CardActionAreaWrapper onClick={handleDrawerToggle}>
-                  <Typography
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: `${theme.typography.pxToRem(55)}`
-                    }}
-                    color="text.secondary"
-                  >
-                    <ArchiveTwoToneIcon fontSize="inherit" />
-                  </Typography>
-                </CardActionAreaWrapper>
-                <Divider />
-                <CardActions
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 2
-                  }}
-                >
-                  <Box>
-                    <Box display="flex" alignItems="center" pb={0.5}>
-                      <ArchiveTwoToneIcon />
-                      <Typography
-                        sx={{
-                          pl: 1
-                        }}
-                        fontWeight="bold"
-                        variant="h6"
-                      >
-                        HolidayPictures.zip
-                      </Typography>
-                    </Box>
-                    <Typography component="span" variant="subtitle1">
-                      {t('You opened in the past year')}
-                    </Typography>
-                  </Box>
-                  <IconButton size="small" color="primary">
-                    <MoreHorizTwoToneIcon />
-                  </IconButton>
-                </CardActions>
-              </Card>
-            </Grid>
-          </>
+          )
+        }):
+        <Grid  item xs={12} sm={12} >
+        <Box>
+        <Typography
+        sx={{
+          pl: 1
+        }}
+        fontWeight="bold"
+        variant="h6"
+        >
+        you dont have files shared with you for the moment
+
+        </Typography>
+        </Box>
+        </Grid>
         )}
+
 
         {tabs === 'table_view' && (
           <Grid item xs={12}>
@@ -612,7 +593,7 @@ function QuickAccess() {
         onClose={handleDrawerToggle}
         elevation={9}
       >
-        {mobileOpen && <SidebarDrawer />}
+        {mobileOpen && <SidebarDrawer file={selectedFile} />}
       </Drawer>
     </>
   );

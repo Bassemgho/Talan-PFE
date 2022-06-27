@@ -9,6 +9,8 @@ import authrouter from "./routes/auth.js"
 import errorHandler from "./middlewares/errorHandler.js";
 import adminRouter from './routes/admin.js'
 import eventRouter from './routes/event.js'
+import chatRouter from './routes/chat.js'
+import filesRouter from './routes/file.js'
 import protectsocket from './middlewares/socketprotection.js'
 import sockethandler from './socket/sockethandler.js'
 
@@ -20,6 +22,7 @@ export const io = new Server(httpserver,{
     credentials:true
   }
 })
+app.disable('etag');
 app.set('socket',io)
 io.use(protectsocket)
 app.use(bodyParser.json({limit:"30mb",extended:true}));
@@ -30,6 +33,8 @@ app.use(authrouter)
 app.use(adminRouter)
 app.use(adminRouter)
 app.use(eventRouter)
+app.use(filesRouter)
+app.use(chatRouter)
 app.use("/",(req,res) => { res.status(201).json({
     success:true,
     message:"helloworld"

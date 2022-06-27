@@ -2,16 +2,27 @@ import files from '../models/file.js'
 import messages from '../models/message.js'
 import events from '../models/event.js'
 import rooms from '../models/room.js'
-export getmyfiles = async (req,res,next)=> {
-  const {user} = req.user;
+export const getmyfiles = async (req,res,next)=> {
+  const user = req.user;
+  console.log(user);
   const id = user._id
   // look for rooms;
+  // if(user.role.titre ==='admin'){
+  //   try {
+  //     const roms = await rooms.find({})
+  //   }catch(err){
+  //     return next(err);
+  //   }
+  // }else{
+  //
+  // }
   try {
     const evts = await events.find({$or:[{participants:id},{mods:id}]}).populate('participants').populate('mods')
     const listevents = evts.map((event)=>{
       return event._id
     })
-    const roms = await rooms.find({_id:{$in:listevents}}).populate('files')
+    const roms = await rooms.find({event:{$in:listevents}}).populate('event')
+    console.log('events',listevents);
     return res.status(201).json({success:true, rooms:roms})
 
 

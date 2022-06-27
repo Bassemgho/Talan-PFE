@@ -3,6 +3,7 @@ import Authenticated from 'src/components/Authenticated';
 import { Navigate } from 'react-router-dom';
 import Room from 'src/components/Room/Room'
 import ChangePass from 'src/content/pages/ChangePass'
+import ChangePassword from 'src/content/pages/Auth/ChangePassword'
 import Activated from 'src/components/Activated'
 // import SuspenseLoader from 'src/components/SuspenseLoader';
 
@@ -86,6 +87,12 @@ const router = [
     path:'auth/activate/:token/',
     element:(
       <ChangePass />
+    )
+  },
+  {
+    path: 'auth/resetpassword/:token',
+    element:(
+      <ChangePassword/>
     )
   }
 ];
