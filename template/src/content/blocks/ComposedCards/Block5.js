@@ -162,9 +162,9 @@ function FileCard({attachement}){
 
 
   return (
-    <Grid item xs={12} sm={6}>
+    <Grid item xs={12} sm={12}>
       <Card>
-        <CardActionAreaWrapper onClick={()=>{}}>
+        <CardActionAreaWrapper onClick={()=>{console.log('hello',attachement);}}>
           <Typography
             sx={{
               display: 'flex',

@@ -22,6 +22,7 @@ const BottomBar = ({
     [setShowVideoDevices]
   );
 
+
   return (
     <Bar>
       <Left>
@@ -72,6 +73,14 @@ const BottomBar = ({
             />
           </div>
           Share Screen
+        </ScreenButton>
+        <ScreenButton onClick={clickScreenSharing}>
+          <div>
+            <FaIcon
+              className={`fas fa-desktop ${screenShare ? 'sharing' : ''}`}
+            />
+          </div>
+          record
         </ScreenButton>
       </Center>
       <Right>

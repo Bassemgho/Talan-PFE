@@ -201,7 +201,6 @@ console.log(peers,peersRef);
   },[])
   function createUserVideo(peer, index, arr) {
   return (
-    <Grid item xs={12} md={6} lg={6}>
 
     <VideoBox
       className={`width-peer${peers.length > 8 ? '' : peers.length}`}
@@ -212,7 +211,6 @@ console.log(peers,peersRef);
       <FaIcon className='fas fa-expand' />
       <Video key={index} peer={peer} number={arr.length} />
     </VideoBox>
-    </Grid >
 
 
   );
@@ -402,9 +400,6 @@ const clickBackground = () => {
       <VideoAndBarContainer>
         <VideoContainer>
           {/* Current User Video */}
-          <Scrollbar>
-          <Grid container wrap="wrap" spacing={2}>
-            <Grid item xs={12} md={6} lg={6}>
           <VideoBox
             className={`width-peer${peers.length > 8 ? '' : peers.length}`}
           >
@@ -420,13 +415,11 @@ const clickBackground = () => {
               playInline
             />
           </VideoBox>
-            </Grid>
+
           {/* les autre utilisateurs */}
           {peers &&
             peers.map((peer, index, arr) => createUserVideo(peer, index, arr))}
-            </Grid >
 
-            </Scrollbar>
           </VideoContainer>
 
         <BottomBarStyled
@@ -648,7 +641,8 @@ const clickBackground = () => {
 }
 const BottomBarStyled = materialStyled(BottomBar)(
   ({theme}) => {
-`    position: fixed;
+`    position: absolute;
+z-index: 9001;
 bottom: 0;
 width: 100%;
 transition: width 0.3s, height 0.3s, transform 0.3s;
