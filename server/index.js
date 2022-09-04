@@ -25,7 +25,7 @@ export const io = new Server(httpserver,{
 })
 app.disable('etag');
 app.set('socket',io)
-app.set('view engine', 'html');
+// app.set('view engine', 'html');
 // console.log(path .dirname());
 // app.get('/*', function(req, res) {
 //   res.sendFile('/home/bassem/Desktop/Front/template/build/index.html', function(err) {

@@ -22,7 +22,7 @@ let transport = nodemailer.createTransport({
       pass:pass,
       clientId:'834985114594-hd92eo90c1c65tm2liuii3cciatbqne9.apps.googleusercontent.com',
       clientSecret:'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',
-      refreshToken: '1//04Tq5aJAdMD5OCgYIARAAGAQSNwF-L9IrbTd010cVJHIz6GiWeDtuGF24XWR4q64oQ8IVUMy8JfJIF7eQGhxl-ajBOCWTEMNXlf4'
+      refreshToken: '1//04vJObVK64qrXCgYIARAAGAQSNwF-L9Ir6aIMbic0E3KRBxtTP0M878_rdMAiX-dV-OMS2XcksXeepovjHmxxBAt5kRNgm7T6KM0'
       // accessToken:'AIzaSyB4FFd9bZl1lT_l6Cff-7GfmCCrRx2IP4A'
   }
 });
@@ -182,12 +182,13 @@ export const deleteuser = async (req,res,next) =>{
     const result = await users.deleteMany({_id:{$in:ids}})
     console.log(result);
     if (result.deletedCount>0) {
-      fetch(`${URL}/v3/users/${ids}`, {
-          method: 'POST',
-          body: JSON.stringify(body),
-          headers: { 'Content-Type': 'application/json',"Api-Token":TOKEN }
-      }).then(res => res.json())
-        .then(json => console.log(json));
+      // fetch(`${URL}/v3/users/${ids}`, {
+      //     method: 'POST',
+      //     body: JSON.stringify(body),
+      //     headers: { 'Content-Type': 'application/json',"Api-Token":TOKEN }
+      // }).then(res => res.json())
+      //   .then(json => console.log(json));
+
 
       return res.status(201).json({success:true,message:'users deleted'})
     }else {

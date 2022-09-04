@@ -13,6 +13,7 @@ let transport  = nodemailer.createTransport({
     auth: {
       user: email,
       pass: pass,
+
     },
   });
   let handlebarsOptions = {
@@ -56,7 +57,7 @@ export const getUserInfo = (req,res,next) => {
    }
  }
 export const delete_user = async (req,res,next) => {
-    const {user_id,}=req.body
+    const {user_id}=req.body
     try {
         const result = await users.deleteOne({_id:user_id})
         const all = await users.find().populate("role")
