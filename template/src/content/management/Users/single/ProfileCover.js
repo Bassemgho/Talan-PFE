@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-for */
 import PropTypes from 'prop-types';
-
+import axios from 'axios'
 import {
   Box,
   Typography,
@@ -55,7 +55,7 @@ const ButtonUploadWrapper = styled(Box)(
       width: ${theme.spacing(4)};
       height: ${theme.spacing(4)};
       padding: 0;
-  
+
       &:hover {
         background: ${theme.colors.primary.dark};
       }
@@ -85,7 +85,31 @@ const ProfileCover = ({ user }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const onLoad = async fileString => {
+    try {
+      console.log('onLoad');
+      const response = await axios.post('http://localhost:5000/user/updateavatar',{avatar:fileString})
+      if (response.success) {
+        alert('done')
+        window.location.reload(false);
+      }
+    } catch (e) {
+      console.log(e);
+      alert(e)
+    }
+  };
+  const getBase64 = file => {
+    let reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      onLoad(reader.result);
+    };
+  };
+  const onChange = e => {
+    const files = e.target.files;
+    const file = files[0];
+    getBase64(file);
+  };
   const handleBack = () => {
     return navigate(
       `/${location.pathname.split('/')[1]}/management/users/list`
@@ -139,6 +163,7 @@ const ProfileCover = ({ user }) => {
             id="icon-button-file"
             name="icon-button-file"
             type="file"
+            onChange={onChange}
           />
           <label htmlFor="icon-button-file">
             <IconButton component="span" color="primary">

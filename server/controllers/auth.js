@@ -149,7 +149,6 @@ export const verifyActivationtoken = async (req, res, next) => {
     user_id: user._id,
     nickname:`${user.firstname} ${user.lastname}`,
     profile_url:'',
-    issue_access_token: true
 }
 
 fetch(`${URL}/v3/users`, {
@@ -183,6 +182,12 @@ export const deleteuser = async (req,res,next) =>{
     const result = await users.deleteMany({_id:{$in:ids}})
     console.log(result);
     if (result.deletedCount>0) {
+      fetch(`${URL}/v3/users/${ids}`, {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: { 'Content-Type': 'application/json',"Api-Token":TOKEN }
+      }).then(res => res.json())
+        .then(json => console.log(json));
 
       return res.status(201).json({success:true,message:'users deleted'})
     }else {
@@ -260,7 +265,7 @@ export const signin = async (req, res, next) => {
         const isMatch = await user.matchpasswords(password)
         console.log('ismattch',isMatch);
         if (!isMatch) {
-            return (next("password is incorrect", 401));
+            return (next(new errorResponse("password is incorrect",401)));
         }
         delete user.password
         sendToken(user, 200, res);
@@ -271,5 +276,6 @@ export const signin = async (req, res, next) => {
 }
 const sendToken = (user, code, res) => {
     const token = user.getsignedtoken();
+    console.log('code',code);
     res.status(code).json({ success: true, accessToken:token, role: user.role.titre ,user})
 }

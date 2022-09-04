@@ -4,6 +4,7 @@ import React, { useCallback } from 'react';
 // import styled from 'styled-components';
 import {styled} from '@mui/material'
 const BottomBar = ({
+  clickRecord,
   clickChat,
   clickCameraDevice,
   goToBack,
@@ -74,7 +75,7 @@ const BottomBar = ({
           </div>
           Share Screen
         </ScreenButton>
-        <ScreenButton onClick={clickScreenSharing}>
+        <ScreenButton onClick={clickRecord}>
           <div>
             <FaIcon
               className={`fas fa-desktop ${screenShare ? 'sharing' : ''}`}
@@ -82,6 +83,7 @@ const BottomBar = ({
           </div>
           record
         </ScreenButton>
+
       </Center>
       <Right>
         <StopButton onClick={goToBack}>Stop</StopButton>

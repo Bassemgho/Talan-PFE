@@ -40,7 +40,9 @@ import useAuth from 'src/hooks/useAuth';
 
 // import { Box, Flex, Stack ,useDisclosure,Button} from '@chakra-ui/react'
 import styled from 'styled-components';
+import RecordRTC,{RecordRTCPromisesHandler} from 'recordrtc';
 import Video from '../VideoCard/VideoCard'
+import VideoTile from '../VideoCard/VideoTile'
 import BottomBar from '../BottomBar/BottomBar';
 // import Chat from '../Chat/Chat';
 import Chat from 'src/content/blocks/ComposedCards/Block5.js'
@@ -50,8 +52,128 @@ import './Room.css'
 import VoteDialogue from 'src/components/Room/VoteDialogue.jsx'
 import UsersDisplay from 'src/components/Room/UsersDisplay.jsx'
 import AllVotesDialogue from 'src/components/Room/AllVotesDialogue.jsx'
+//twesting
+import {
+  CallParticipantListParticipant,
+  CameraButton,
+  ControlBar,
+  EndCallButton,
+  FluentThemeProvider,
+  MicrophoneButton,
+  DevicesButton,
+  ParticipantsButton,
+  ScreenShareButton,
+  VideoGallery,
+  // VideoTile
 
+} from '@azure/communication-react';
+import { DefaultButton } from '@fluentui/react';
+import { IContextualMenuProps } from '@fluentui/react';
+const VideoFlex = () => {
+  return(
+    <Box
+    sx={{flexDirection:'column',
+        flexWrap:'wrap',
+      }}
+    >
 
+    </Box>
+  )
+}
+////////////////////////////////////////////////////////////
+// import React from 'react';
+const MockLocalParticipant = {
+  userId: 'user1',
+  displayName: 'You',
+  state: 'Connected',
+  isMuted: true
+};
+const MockRemoteParticipants = [
+  {
+    userId: 'user1',
+    displayName: 'You',
+    state: 'Connected',
+    isMuted: true,
+    isScreenSharing: false,
+    isRemovable: true
+  },
+  {
+    userId: 'user2',
+    displayName: 'Hal Jordan',
+    state: 'Connected',
+    isMuted: true,
+    isScreenSharing: true,
+    isRemovable: true
+  },
+  {
+    userId: 'user3',
+    displayName: 'Barry Allen',
+    state: 'Idle',
+    isMuted: false,
+    isScreenSharing: false,
+    isRemovable: true
+  },
+  {
+    userId: 'user4',
+    displayName: 'Bruce Wayne',
+    state: 'Connecting',
+    isMuted: false,
+    isScreenSharing: false,
+    isRemovable: false
+  }
+];
+
+export const AllButtonsControlBarExample = () => {
+  const exampleOptionsMenuProps = {
+    items: [
+      {
+        key: '1',
+        name: 'Choose Camera',
+        iconProps: { iconName: 'LocationCircle' },
+        onClick: () => alert('Choose Camera Menu Item Clicked!')
+      }
+    ]
+  };
+  const onMuteAll = () => {
+    // your implementation to mute all participants
+  };
+
+  return (
+    <FluentThemeProvider>
+      <ControlBar layout="floatingLeft">
+        <CameraButton
+          onClick={() => {
+            /*handle onClick*/
+          }}
+        />
+        <MicrophoneButton
+          onClick={() => {
+            /*handle onClick*/
+          }}
+        />
+        <ScreenShareButton
+          onClick={() => {
+            /*handle onClick*/
+          }}
+        />
+              <CameraButton key={'camBtn1'} checked={true} />
+        <ParticipantsButton
+          participants={MockRemoteParticipants}
+          myUserId={'user1'}
+          callInvitationURL={'URL to copy'}
+          onMuteAll={onMuteAll}
+        />
+        <DevicesButton menuProps={exampleOptionsMenuProps} />
+        <EndCallButton
+          onClick={() => {
+            /*handle onClick*/
+          }}
+        />
+      </ControlBar>
+    </FluentThemeProvider>
+  );
+};
+/////////////////////////////////////////////////////////////////
  const Room = ()=>{
    const { user } = useAuth();
 
@@ -263,6 +385,22 @@ const clickChat = (e) => {
 
   socket.emit('BE-toggle-camera-audio', { eventid, switchTarget: target });
 };
+const clickRecord = async () => {
+  let recorder
+  if (!recording) {
+    const stream  = await navigator.mediaDevices.getDisplayMedia({cursor:true})
+    const screenTrack = stream.getTracks()[0]
+    recorder = new RecordRTCPromisesHandler(stream, {
+    type: 'video'
+});
+recorder.startRecording();
+  }
+  if (recording && recorder) {
+await recorder.stopRecording();
+let blob = await recorder.getBlob();
+invokeSaveAsDialog(blob);
+  }
+}
 const clickScreenSharing = ()=>{
   if (!screenShare) {
     navigator.mediaDevices.getDisplayMedia({cursor:true}).then((stream)=>{
@@ -394,13 +532,29 @@ const clickBackground = () => {
     }
     openVote()
   }
+    const videoTileStyles = { root: { height: '300px', width: '400px', border: '1px solid #999' } };
+
   return (
     <RoomContainer className='Room' onClick={clickBackground}>
 
       <VideoAndBarContainer>
         <VideoContainer>
           {/* Current User Video */}
-          <VideoBox
+          {userVideoAudio['localUser'].video ? null : (
+            <UserName>{currentUser}</UserName>
+          )}
+          <FaIcon className='fas fa-expand' />
+{/*          <VideoTile
+            onClick={expandScreen}
+            ref={userVideoRef}
+            muted
+            autoPlay
+            playInline
+
+          />*/}
+
+
+    <VideoBox
             className={`width-peer${peers.length > 8 ? '' : peers.length}`}
           >
             {userVideoAudio['localUser'].video ? null : (
@@ -419,10 +573,15 @@ const clickBackground = () => {
           {/* les autre utilisateurs */}
           {peers &&
             peers.map((peer, index, arr) => createUserVideo(peer, index, arr))}
-
+{/*            <VideoGallery
+              layout="floatingLocalVideo"
+              localParticipant={MockLocalParticipant}
+              remoteParticipants={peers}
+            />*/}
           </VideoContainer>
-
+          <AllButtonsControlBarExample/>
         <BottomBarStyled
+          clickRecord={clickRecord}
           clickScreenSharing={clickScreenSharing}
           clickChat={clickChat}
           clickCameraDevice={clickCameraDevice}
@@ -658,7 +817,13 @@ justify-content: center;
   max-height: 100vh;
   flex-direction: row;
 `;
-
+// const VideoFlex = materialStyled(Box)(
+//   ({theme}) => {
+//     `
+//
+//     `
+//   }
+// )
 const VideoContainer = styled.div`
   max-width: 100%;
   height: 92%;

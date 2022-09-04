@@ -2,6 +2,19 @@ import files from '../models/file.js'
 import messages from '../models/message.js'
 import events from '../models/event.js'
 import rooms from '../models/room.js'
+import express from 'express'
+export const downloadFile = async (req,res,next) => {
+  const user = req.user;
+  const id = user._id
+  const {file_id} = req.params
+  try {
+    const file = await files.findOne({_id:file_id})
+    console.log(file.path);
+    return res.status(201).download(file.path.toString())
+  } catch (e) {
+    return next(e)
+  }
+}
 export const getmyfiles = async (req,res,next)=> {
   const user = req.user;
   console.log(user);

@@ -159,12 +159,31 @@ function FileCard({attachement}){
   useEffect(()=>{
     getFileInfo()
   },[getFileInfo])
+  const openInNewTab = (url) => {
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
+    if (newWindow) newWindow.opener = null
+  }
 
+  const handleClick = async () => {
+    try {
+      const response = await axios({
+        url:`http://localhost:5000/files/download/${attachement}`,
+        method:'GET',
+        responseType:'blob'
+      }).then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        openInNewTab(url);
+      })
+        console.log(response);
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
 
   return (
     <Grid item xs={12} sm={12}>
       <Card>
-        <CardActionAreaWrapper onClick={()=>{console.log('hello',attachement);}}>
+        <CardActionAreaWrapper onClick={()=>{handleClick()}}>
           <Typography
             sx={{
               display: 'flex',

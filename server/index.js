@@ -5,6 +5,7 @@ import cors from "cors"
 import http from 'http'
 import morgan from 'morgan'
 import {Server} from 'socket.io'
+import path from 'path'
 import authrouter from "./routes/auth.js"
 import errorHandler from "./middlewares/errorHandler.js";
 import adminRouter from './routes/admin.js'
@@ -24,6 +25,16 @@ export const io = new Server(httpserver,{
 })
 app.disable('etag');
 app.set('socket',io)
+app.set('view engine', 'html');
+// console.log(path .dirname());
+// app.get('/*', function(req, res) {
+//   res.sendFile('/home/bassem/Desktop/Front/template/build/index.html', function(err) {
+//     if (err) {
+//       res.status(500).send(err)
+//     }
+//   })
+// })
+// app.use(express.static('/home/bassem/Desktop/Front/template/build'));
 io.use(protectsocket)
 app.use(bodyParser.json({limit:"30mb",extended:true}));
 app.use(bodyParser.urlencoded({limit:"30mb",extended:true}));
@@ -35,14 +46,14 @@ app.use(adminRouter)
 app.use(eventRouter)
 app.use(filesRouter)
 app.use(chatRouter)
-app.use("/",(req,res) => { res.status(201).json({
-    success:true,
-    message:"helloworld"
-
-
-})
-return
-})
+// app.use("/",(req,res) => { res.status(201).json({
+//     success:true,
+//     message:"helloworld"
+//
+//
+// })
+// return
+// })
 io.on('connection',(socket)=>{
   console.log('user has connected:',socket.id);
   sockethandler(socket)

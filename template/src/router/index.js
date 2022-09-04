@@ -1,11 +1,11 @@
-// import { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import Authenticated from 'src/components/Authenticated';
 import { Navigate } from 'react-router-dom';
-import Room from 'src/components/Room/Room'
+// import Room from 'src/components/Room/Room'
 import ChangePass from 'src/content/pages/ChangePass'
 import ChangePassword from 'src/content/pages/Auth/ChangePassword'
 import Activated from 'src/components/Activated'
-// import SuspenseLoader from 'src/components/SuspenseLoader';
+import SuspenseLoader from 'src/components/SuspenseLoader';
 
 // import BoxedSidebarLayout from 'src/layouts/BoxedSidebarLayout';
 // import DocsLayout from 'src/layouts/DocsLayout';
@@ -25,15 +25,15 @@ import managementRoutes from './management';
 import accountRoutes from './account';
 import baseRoutes from './base';
 
-// const Loader = (Component) => (props) =>
-//   (
-//     <Suspense fallback={<SuspenseLoader />}>
-//       <Component {...props} />
-//     </Suspense>
-//   );
-//   const Room = Loader(
-//     lazy(() => import('src/components/Room/Room'))
-//   );
+const Loader = (Component) => (props) =>
+  (
+    <Suspense fallback={<SuspenseLoader />}>
+      <Component {...props} />
+    </Suspense>
+  );
+  const Room = Loader(
+    lazy(() => import('src/components/Room/Room'))
+  );
 
 const router = [
   {

@@ -1,4 +1,5 @@
 import {addUser,changepassword,forgot_password,signin, verifyresettoken,getuser,deleteuser,verifyActivationtoken,changePasswordActivation} from "../controllers/auth.js"
+import {updateavatar} from '../controllers/users.js'
 import { add_roles } from "../controllers/roles.js";
 import protectAdmin from '../middlewares/protectAdmin.js'
 import protect from '../middlewares/protect.js'
@@ -6,7 +7,7 @@ import express from "express"
 
 const router = express.Router();
 
-
+router.route('/user/updateavatar').post(protect,updateavatar)
 router.post("/auth/signin",signin);
 router.route("/auth/user").get(protect,getuser);
 router.route('/auth/deleteuser').post(protectAdmin,deleteuser)

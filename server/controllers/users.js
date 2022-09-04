@@ -6,7 +6,6 @@ import path from 'path'
 
 // const smtpTransport = nodemailer.createTransport()
 
-
 const email = process.env.MAILER_EMAIL_ID || 'auth_email_address@gmail.com'
 const pass = process.env.MAILER_PASSWORD || 'auth_email_pass'
 let transport  = nodemailer.createTransport({
@@ -22,6 +21,18 @@ let transport  = nodemailer.createTransport({
     extName: '.html'
   };
 transport.use('compile',hbs(handlebarsOptions))
+export const updateavatar = async  (req,res,next) => {
+  try {
+    if (req.body.avatar) {
+
+      req.user.avatar = req.body.avatar
+      await req.user.save()
+      return res.status(201).json({success:true,user:req.user});
+    }
+  } catch (e) {
+    return next(e)
+  }
+}
 export const getUserInfo = (req,res,next) => {
     try {
         const user = req.user
